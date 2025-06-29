@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Turbo.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a70b0fdd149acebc61e22759e506a88463a96354")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+379bac9816c0b17b813cf29b390da7cdaa100185")]
 [assembly: System.Reflection.AssemblyProductAttribute("Turbo.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Turbo.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
