@@ -1,17 +1,13 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Turbo.API.Commands;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
-using Turbo.API.Models;
 using Turbo.API.Queries;
-using Turbo.API.Repositories;
-using Xunit;
 
 namespace Turbo.API.Tests.Controllers;
 
@@ -40,8 +36,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var request = new CreateUserRequest("John Doe", "john@example.com");
         var expectedResponse = new UserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
-        
-        _mockMediator.Setup(m => m.Send<UserResponse>(It.IsAny<CreateUserCommand>(), default))
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<CreateUserCommand>(), default))
             .Returns(Observable.Return(expectedResponse));
 
         // Act
@@ -63,8 +59,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var request = new CreateUserRequest("John Doe", "john@example.com");
         var exception = new InvalidOperationException("User with email john@example.com already exists");
-        
-        _mockMediator.Setup(m => m.Send<UserResponse>(It.IsAny<CreateUserCommand>(), default))
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<CreateUserCommand>(), default))
             .Returns(Observable.Throw<UserResponse>(exception));
 
         // Act
@@ -83,8 +79,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
         var expectedResponse = new UserResponse(userId, "John Doe", "john@example.com", DateTime.UtcNow, null);
-        
-        _mockMediator.Setup(m => m.Send<UserResponse?>(It.IsAny<GetUserByIdQuery>(), default))
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>(), default))
             .Returns(Observable.Return<UserResponse?>(expectedResponse));
 
         // Act
@@ -103,8 +99,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         // Arrange
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
-        
-        _mockMediator.Setup(m => m.Send<UserResponse?>(It.IsAny<GetUserByIdQuery>(), default))
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>(), default))
             .Returns(Observable.Return<UserResponse?>(null));
 
         // Act
@@ -125,8 +121,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
             new(Guid.NewGuid(), "Jane Smith", "jane@example.com", DateTime.UtcNow, null)
         };
         var expectedResponse = new UsersResponse(users);
-        
-        _mockMediator.Setup(m => m.Send<UsersResponse>(It.IsAny<GetAllUsersQuery>(), default))
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetAllUsersQuery>(), default))
             .Returns(Observable.Return(expectedResponse));
 
         // Act
@@ -146,9 +142,10 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
         var request = new UpdateUserRequest("John Updated", "john.updated@example.com");
-        var expectedResponse = new UserResponse(userId, "John Updated", "john.updated@example.com", DateTime.UtcNow, DateTime.UtcNow);
-        
-        _mockMediator.Setup(m => m.Send<UserResponse>(It.IsAny<UpdateUserCommand>(), default))
+        var expectedResponse = new UserResponse(userId, "John Updated", "john.updated@example.com", DateTime.UtcNow,
+            DateTime.UtcNow);
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<UpdateUserCommand>(), default))
             .Returns(Observable.Return(expectedResponse));
 
         // Act
@@ -168,8 +165,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         // Arrange
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
-        
-        _mockMediator.Setup(m => m.Send<bool>(It.IsAny<DeleteUserCommand>(), default))
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>(), default))
             .Returns(Observable.Return(true));
 
         // Act
@@ -187,8 +184,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         // Arrange
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
-        
-        _mockMediator.Setup(m => m.Send<bool>(It.IsAny<DeleteUserCommand>(), default))
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>(), default))
             .Returns(Observable.Return(false));
 
         // Act
@@ -205,8 +202,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var email = "john@example.com";
         var expectedResponse = new UserResponse(Guid.NewGuid(), "John Doe", email, DateTime.UtcNow, null);
-        
-        _mockMediator.Setup(m => m.Send<UserResponse?>(It.IsAny<GetUserByEmailQuery>(), default))
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByEmailQuery>(), default))
             .Returns(Observable.Return<UserResponse?>(expectedResponse));
 
         // Act
@@ -218,4 +215,4 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         Assert.NotNull(result);
         Assert.Equal(email, result.Email);
     }
-} 
+}

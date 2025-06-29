@@ -1,20 +1,19 @@
-using System.Reactive;
 using System.Reactive.Linq;
+using MediatR;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
 using Turbo.API.Repositories;
-using MediatR;
 
 namespace Turbo.API.Queries;
 
 public record GetUserByIdQuery : IRequest<UserResponse?>
 {
-    public Guid Id { get; init; }
-
     public GetUserByIdQuery(Guid id)
     {
         Id = id;
     }
+
+    public Guid Id { get; init; }
 }
 
 public class GetUserByIdQueryHandler : IReactiveRequestHandler<GetUserByIdQuery, UserResponse?>
@@ -29,12 +28,14 @@ public class GetUserByIdQueryHandler : IReactiveRequestHandler<GetUserByIdQuery,
     public IObservable<UserResponse?> Handle(GetUserByIdQuery request)
     {
         return _userRepository.GetByIdAsync(request.Id)
-            .Select(user => user == null ? null : new UserResponse(
-                user.Id,
-                user.Name,
-                user.Email,
-                user.CreatedAt,
-                user.UpdatedAt
-            ));
+            .Select(user => user == null
+                ? null
+                : new UserResponse(
+                    user.Id,
+                    user.Name,
+                    user.Email,
+                    user.CreatedAt,
+                    user.UpdatedAt
+                ));
     }
-} 
+}

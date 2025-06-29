@@ -5,14 +5,13 @@ using Turbo.API.Commands;
 using Turbo.API.DTOs;
 using Turbo.API.Models;
 using Turbo.API.Repositories;
-using Xunit;
 
 namespace Turbo.API.Tests.Commands;
 
 public class UpdateUserCommandHandlerTests
 {
-    private readonly Mock<IUserRepository> _mockRepository;
     private readonly UpdateUserCommandHandler _handler;
+    private readonly Mock<IUserRepository> _mockRepository;
 
     public UpdateUserCommandHandlerTests()
     {
@@ -27,10 +26,10 @@ public class UpdateUserCommandHandlerTests
         var userId = Guid.NewGuid();
         var request = new UpdateUserRequest("John Updated", "john.updated@example.com");
         var command = new UpdateUserCommand(userId, request);
-        
+
         var existingUser = new User("John Doe", "john@example.com") { Id = userId };
         var updatedUser = new User("John Updated", "john.updated@example.com") { Id = userId };
-        
+
         _mockRepository.Setup(r => r.GetByIdAsync(userId))
             .Returns(Observable.Return(existingUser));
         _mockRepository.Setup(r => r.UpdateAsync(It.IsAny<User>()))
@@ -44,9 +43,9 @@ public class UpdateUserCommandHandlerTests
         Assert.Equal(userId, result.Id);
         Assert.Equal("John Updated", result.Name);
         Assert.Equal("john.updated@example.com", result.Email);
-        
+
         _mockRepository.Verify(r => r.GetByIdAsync(userId), Times.Once);
-        _mockRepository.Verify(r => r.UpdateAsync(It.Is<User>(u => 
+        _mockRepository.Verify(r => r.UpdateAsync(It.Is<User>(u =>
             u.Id == userId && u.Name == "John Updated" && u.Email == "john.updated@example.com")), Times.Once);
     }
 
@@ -57,14 +56,13 @@ public class UpdateUserCommandHandlerTests
         var userId = Guid.NewGuid();
         var request = new UpdateUserRequest("John Updated", "john.updated@example.com");
         var command = new UpdateUserCommand(userId, request);
-        
+
         _mockRepository.Setup(r => r.GetByIdAsync(userId))
             .Returns(Observable.Return<User?>(null));
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _handler.Handle(command).ToTask());
-        
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(command).ToTask());
+
         Assert.Equal($"User with id {userId} not found", exception.Message);
         _mockRepository.Verify(r => r.GetByIdAsync(userId), Times.Once);
         _mockRepository.Verify(r => r.UpdateAsync(It.IsAny<User>()), Times.Never);
@@ -78,7 +76,7 @@ public class UpdateUserCommandHandlerTests
         var request = new UpdateUserRequest("John Updated", "john.updated@example.com");
         var command = new UpdateUserCommand(userId, request);
         var expectedException = new InvalidOperationException("Email already exists");
-        
+
         var existingUser = new User("John Doe", "john@example.com") { Id = userId };
         _mockRepository.Setup(r => r.GetByIdAsync(userId))
             .Returns(Observable.Return(existingUser));
@@ -86,9 +84,8 @@ public class UpdateUserCommandHandlerTests
             .Returns(Observable.Throw<User>(expectedException));
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _handler.Handle(command).ToTask());
-        
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(command).ToTask());
+
         Assert.Equal("Email already exists", exception.Message);
     }
-} 
+}

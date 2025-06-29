@@ -10,4 +10,4 @@ public interface IReactiveRequestHandler<in TRequest, TResponse>
 public interface IReactiveNotificationHandler<in TNotification>
 {
     IObservable<Unit> Handle(TNotification notification);
-} 
+}

@@ -1,25 +1,23 @@
-using MediatR;
-using System.Reactive;
 using System.Reactive.Linq;
+using MediatR;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
-using Turbo.API.Models;
 using Turbo.API.Repositories;
 
 namespace Turbo.API.Commands;
 
 public record UpdateUserCommand : IRequest<UserResponse>
 {
-    public Guid Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public string Email { get; init; } = string.Empty;
-
     public UpdateUserCommand(Guid id, UpdateUserRequest request)
     {
         Id = id;
         Name = request.Name;
         Email = request.Email;
     }
+
+    public Guid Id { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public string Email { get; init; } = string.Empty;
 }
 
 public class UpdateUserCommandHandler : IReactiveRequestHandler<UpdateUserCommand, UserResponse>
@@ -36,10 +34,7 @@ public class UpdateUserCommandHandler : IReactiveRequestHandler<UpdateUserComman
         return _userRepository.GetByIdAsync(request.Id)
             .SelectMany(existingUser =>
             {
-                if (existingUser == null)
-                {
-                    throw new InvalidOperationException($"User with id {request.Id} not found");
-                }
+                if (existingUser == null) throw new InvalidOperationException($"User with id {request.Id} not found");
 
                 existingUser.Update(request.Name, request.Email);
                 return _userRepository.UpdateAsync(existingUser);
@@ -52,4 +47,4 @@ public class UpdateUserCommandHandler : IReactiveRequestHandler<UpdateUserComman
                 updatedUser.UpdatedAt
             ));
     }
-} 
+}

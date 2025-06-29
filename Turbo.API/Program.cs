@@ -1,4 +1,3 @@
-using MediatR;
 using Turbo.API.Commands;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
@@ -26,12 +25,17 @@ public class Program
         builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
 
         // Register handlers
-        builder.Services.AddTransient<IReactiveRequestHandler<CreateUserCommand, UserResponse>, CreateUserCommandHandler>();
-        builder.Services.AddTransient<IReactiveRequestHandler<UpdateUserCommand, UserResponse>, UpdateUserCommandHandler>();
+        builder.Services
+            .AddTransient<IReactiveRequestHandler<CreateUserCommand, UserResponse>, CreateUserCommandHandler>();
+        builder.Services
+            .AddTransient<IReactiveRequestHandler<UpdateUserCommand, UserResponse>, UpdateUserCommandHandler>();
         builder.Services.AddTransient<IReactiveRequestHandler<DeleteUserCommand, bool>, DeleteUserCommandHandler>();
-        builder.Services.AddTransient<IReactiveRequestHandler<GetUserByIdQuery, UserResponse?>, GetUserByIdQueryHandler>();
-        builder.Services.AddTransient<IReactiveRequestHandler<GetAllUsersQuery, UsersResponse>, GetAllUsersQueryHandler>();
-        builder.Services.AddTransient<IReactiveRequestHandler<GetUserByEmailQuery, UserResponse?>, GetUserByEmailQueryHandler>();
+        builder.Services
+            .AddTransient<IReactiveRequestHandler<GetUserByIdQuery, UserResponse?>, GetUserByIdQueryHandler>();
+        builder.Services
+            .AddTransient<IReactiveRequestHandler<GetAllUsersQuery, UsersResponse>, GetAllUsersQueryHandler>();
+        builder.Services
+            .AddTransient<IReactiveRequestHandler<GetUserByEmailQuery, UserResponse?>, GetUserByEmailQueryHandler>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
@@ -39,10 +43,7 @@ public class Program
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.MapOpenApi();
-        }
+        if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
         app.UseHttpsRedirection();
         app.UseAuthorization();

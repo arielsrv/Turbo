@@ -1,9 +1,8 @@
-using System.Reactive;
 using System.Reactive.Linq;
+using MediatR;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
 using Turbo.API.Repositories;
-using MediatR;
 
 namespace Turbo.API.Queries;
 
@@ -31,4 +30,4 @@ public class GetAllUsersQueryHandler : IReactiveRequestHandler<GetAllUsersQuery,
                 ))
             ));
     }
-} 
+}

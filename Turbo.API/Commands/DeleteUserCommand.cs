@@ -1,19 +1,17 @@
-using System.Reactive;
-using System.Reactive.Linq;
+using MediatR;
 using Turbo.API.Mediation;
 using Turbo.API.Repositories;
-using MediatR;
 
 namespace Turbo.API.Commands;
 
 public record DeleteUserCommand : IRequest<bool>
 {
-    public Guid Id { get; init; }
-
     public DeleteUserCommand(Guid id)
     {
         Id = id;
     }
+
+    public Guid Id { get; init; }
 }
 
 public class DeleteUserCommandHandler : IReactiveRequestHandler<DeleteUserCommand, bool>
@@ -29,4 +27,4 @@ public class DeleteUserCommandHandler : IReactiveRequestHandler<DeleteUserComman
     {
         return _userRepository.DeleteAsync(request.Id);
     }
-} 
+}

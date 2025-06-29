@@ -1,5 +1,4 @@
 using Turbo.API.Models;
-using Xunit;
 
 namespace Turbo.API.Tests.Models;
 
@@ -103,9 +102,9 @@ public class UserTests
         // Act
         user.Update("John Updated", "john.updated@example.com");
         var firstUpdate = user.UpdatedAt;
-        
+
         Thread.Sleep(10); // Ensure time difference
-        
+
         user.Update("John Final", "john.final@example.com");
         var secondUpdate = user.UpdatedAt;
 
@@ -129,4 +128,4 @@ public class UserTests
         Assert.NotEqual(Guid.Empty, user1.Id);
         Assert.NotEqual(Guid.Empty, user2.Id);
     }
-} 
+}

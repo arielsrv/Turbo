@@ -1,8 +1,6 @@
-using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using Turbo.API.Models;
 using Turbo.API.Repositories;
-using Xunit;
 
 namespace Turbo.API.Tests.Repositories;
 
@@ -40,8 +38,7 @@ public class InMemoryUserRepositoryTests
 
         // Act & Assert
         await _repository.AddAsync(user1).ToTask();
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _repository.AddAsync(user2).ToTask());
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _repository.AddAsync(user2).ToTask());
 
         Assert.Equal("User with email john@example.com already exists", exception.Message);
     }
@@ -55,8 +52,7 @@ public class InMemoryUserRepositoryTests
 
         // Act & Assert
         await _repository.AddAsync(user1).ToTask();
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _repository.AddAsync(user2).ToTask());
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _repository.AddAsync(user2).ToTask());
 
         Assert.Equal("User with email JOHN@EXAMPLE.COM already exists", exception.Message);
     }
@@ -148,8 +144,9 @@ public class InMemoryUserRepositoryTests
         var nonExistingUser = new User("John Doe", "john@example.com") { Id = Guid.NewGuid() };
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _repository.UpdateAsync(nonExistingUser).ToTask());
+        var exception =
+            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+                _repository.UpdateAsync(nonExistingUser).ToTask());
 
         Assert.Equal($"User with id {nonExistingUser.Id} not found", exception.Message);
     }
@@ -166,8 +163,8 @@ public class InMemoryUserRepositoryTests
         user2.Update("Jane Updated", "john@example.com"); // Try to use John's email
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _repository.UpdateAsync(user2).ToTask());
+        var exception =
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _repository.UpdateAsync(user2).ToTask());
 
         Assert.Equal("User with email john@example.com already exists", exception.Message);
     }
@@ -256,7 +253,7 @@ public class InMemoryUserRepositoryTests
         var userCount = 100;
 
         // Act - Add users concurrently
-        for (int i = 0; i < userCount; i++)
+        for (var i = 0; i < userCount; i++)
         {
             var user = new User($"User{i}", $"user{i}@example.com");
             tasks.Add(_repository.AddAsync(user).ToTask());
@@ -268,4 +265,4 @@ public class InMemoryUserRepositoryTests
         var allUsers = await _repository.GetAllAsync().ToTask();
         Assert.Equal(userCount, allUsers.Count());
     }
-} 
+}

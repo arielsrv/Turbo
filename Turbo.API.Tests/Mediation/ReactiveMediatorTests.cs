@@ -1,4 +1,3 @@
-using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,7 +6,7 @@ using Turbo.API.Commands;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
 using Turbo.API.Queries;
-using Xunit;
+using Unit = System.Reactive.Unit;
 
 namespace Turbo.API.Tests.Mediation;
 
@@ -21,7 +20,7 @@ public class ReactiveMediatorTests
     {
         _mockMediator = new Mock<IMediator>();
         _reactiveMediator = new ReactiveMediator(_mockMediator.Object);
-        
+
         // Setup service provider for testing
         var services = new ServiceCollection();
         services.AddSingleton(_mockMediator.Object);
@@ -34,19 +33,19 @@ public class ReactiveMediatorTests
         // Arrange
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
         var expectedResponse = new UserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
-        
+
         _mockMediator.Setup(m => m.Send(command, default))
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _reactiveMediator.Send<UserResponse>(command).ToTask();
+        var result = await _reactiveMediator.Send(command).ToTask();
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(expectedResponse.Id, result.Id);
         Assert.Equal(expectedResponse.Name, result.Name);
         Assert.Equal(expectedResponse.Email, result.Email);
-        
+
         _mockMediator.Verify(m => m.Send(command, default), Times.Once);
     }
 
@@ -56,14 +55,14 @@ public class ReactiveMediatorTests
         // Arrange
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
         var expectedException = new InvalidOperationException("Handler not found");
-        
+
         _mockMediator.Setup(m => m.Send(command, default))
             .ThrowsAsync(expectedException);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _reactiveMediator.Send<UserResponse>(command).ToTask());
-        
+        var exception =
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _reactiveMediator.Send(command).ToTask());
+
         Assert.Equal("Handler not found", exception.Message);
         _mockMediator.Verify(m => m.Send(command, default), Times.Once);
     }
@@ -75,12 +74,12 @@ public class ReactiveMediatorTests
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
         var expectedResponse = new UserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
         var cancellationToken = new CancellationToken();
-        
+
         _mockMediator.Setup(m => m.Send(command, cancellationToken))
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _reactiveMediator.Send<UserResponse>(command, cancellationToken).ToTask();
+        var result = await _reactiveMediator.Send(command, cancellationToken).ToTask();
 
         // Assert
         Assert.NotNull(result);
@@ -92,7 +91,7 @@ public class ReactiveMediatorTests
     {
         // Arrange
         var notification = new object();
-        
+
         _mockMediator.Setup(m => m.Publish(notification, default))
             .Returns(Task.CompletedTask);
 
@@ -100,7 +99,7 @@ public class ReactiveMediatorTests
         var result = await _reactiveMediator.Publish(notification).ToTask();
 
         // Assert
-        Assert.Equal(System.Reactive.Unit.Default, result);
+        Assert.Equal(Unit.Default, result);
         _mockMediator.Verify(m => m.Publish(notification, default), Times.Once);
     }
 
@@ -110,14 +109,14 @@ public class ReactiveMediatorTests
         // Arrange
         var notification = new object();
         var expectedException = new InvalidOperationException("Notification handler error");
-        
+
         _mockMediator.Setup(m => m.Publish(notification, default))
             .ThrowsAsync(expectedException);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _reactiveMediator.Publish(notification).ToTask());
-        
+        var exception =
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _reactiveMediator.Publish(notification).ToTask());
+
         Assert.Equal("Notification handler error", exception.Message);
         _mockMediator.Verify(m => m.Publish(notification, default), Times.Once);
     }
@@ -128,7 +127,7 @@ public class ReactiveMediatorTests
         // Arrange
         var notification = new object();
         var cancellationToken = new CancellationToken();
-        
+
         _mockMediator.Setup(m => m.Publish(notification, cancellationToken))
             .Returns(Task.CompletedTask);
 
@@ -136,7 +135,7 @@ public class ReactiveMediatorTests
         var result = await _reactiveMediator.Publish(notification, cancellationToken).ToTask();
 
         // Assert
-        Assert.Equal(System.Reactive.Unit.Default, result);
+        Assert.Equal(Unit.Default, result);
         _mockMediator.Verify(m => m.Publish(notification, cancellationToken), Times.Once);
     }
 
@@ -146,12 +145,12 @@ public class ReactiveMediatorTests
         // Arrange
         var command = new DeleteUserCommand(Guid.NewGuid());
         var expectedResponse = true;
-        
+
         _mockMediator.Setup(m => m.Send(command, default))
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _reactiveMediator.Send<bool>(command).ToTask();
+        var result = await _reactiveMediator.Send(command).ToTask();
 
         // Assert
         Assert.Equal(expectedResponse, result);
@@ -164,15 +163,15 @@ public class ReactiveMediatorTests
         // Arrange
         var query = new GetUserByIdQuery(Guid.NewGuid());
         UserResponse? expectedResponse = null;
-        
+
         _mockMediator.Setup(m => m.Send(query, default))
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _reactiveMediator.Send<UserResponse?>(query).ToTask();
+        var result = await _reactiveMediator.Send(query).ToTask();
 
         // Assert
         Assert.Null(result);
         _mockMediator.Verify(m => m.Send(query, default), Times.Once);
     }
-} 
+}

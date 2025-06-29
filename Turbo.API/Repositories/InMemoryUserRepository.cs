@@ -5,8 +5,8 @@ namespace Turbo.API.Repositories;
 
 public class InMemoryUserRepository : IUserRepository
 {
-    private readonly List<User> _users = new();
     private readonly object _lock = new();
+    private readonly List<User> _users = new();
 
     public IObservable<User> AddAsync(User user)
     {
@@ -97,7 +97,8 @@ public class InMemoryUserRepository : IUserRepository
                     }
 
                     // Verificar que el email no esté duplicado (excluyendo el usuario actual)
-                    if (_users.Any(u => u.Id != user.Id && u.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase)))
+                    if (_users.Any(u =>
+                            u.Id != user.Id && u.Email.Equals(user.Email, StringComparison.OrdinalIgnoreCase)))
                     {
                         observer.OnError(new InvalidOperationException($"User with email {user.Email} already exists"));
                         return () => { };
@@ -169,4 +170,4 @@ public class InMemoryUserRepository : IUserRepository
             return () => { };
         });
     }
-} 
+}

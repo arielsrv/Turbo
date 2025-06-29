@@ -1,18 +1,16 @@
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using Moq;
-using Turbo.API.DTOs;
 using Turbo.API.Models;
 using Turbo.API.Queries;
 using Turbo.API.Repositories;
-using Xunit;
 
 namespace Turbo.API.Tests.Queries;
 
 public class GetUserByEmailQueryHandlerTests
 {
-    private readonly Mock<IUserRepository> _mockRepository;
     private readonly GetUserByEmailQueryHandler _handler;
+    private readonly Mock<IUserRepository> _mockRepository;
 
     public GetUserByEmailQueryHandlerTests()
     {
@@ -27,7 +25,7 @@ public class GetUserByEmailQueryHandlerTests
         var email = "john@example.com";
         var query = new GetUserByEmailQuery(email);
         var expectedUser = new User("John Doe", email) { Id = Guid.NewGuid() };
-        
+
         _mockRepository.Setup(r => r.GetByEmailAsync(email))
             .Returns(Observable.Return(expectedUser));
 
@@ -41,7 +39,7 @@ public class GetUserByEmailQueryHandlerTests
         Assert.Equal(email, result.Email);
         Assert.Equal(expectedUser.CreatedAt, result.CreatedAt);
         Assert.Equal(expectedUser.UpdatedAt, result.UpdatedAt);
-        
+
         _mockRepository.Verify(r => r.GetByEmailAsync(email), Times.Once);
     }
 
@@ -51,7 +49,7 @@ public class GetUserByEmailQueryHandlerTests
         // Arrange
         var email = "nonexistent@example.com";
         var query = new GetUserByEmailQuery(email);
-        
+
         _mockRepository.Setup(r => r.GetByEmailAsync(email))
             .Returns(Observable.Return<User?>(null));
 
@@ -70,14 +68,13 @@ public class GetUserByEmailQueryHandlerTests
         var email = "john@example.com";
         var query = new GetUserByEmailQuery(email);
         var expectedException = new InvalidOperationException("Database error");
-        
+
         _mockRepository.Setup(r => r.GetByEmailAsync(email))
             .Returns(Observable.Throw<User?>(expectedException));
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _handler.Handle(query).ToTask());
-        
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(query).ToTask());
+
         Assert.Equal("Database error", exception.Message);
     }
 
@@ -87,7 +84,7 @@ public class GetUserByEmailQueryHandlerTests
         // Arrange
         var email = "";
         var query = new GetUserByEmailQuery(email);
-        
+
         _mockRepository.Setup(r => r.GetByEmailAsync(email))
             .Returns(Observable.Return<User?>(null));
 
@@ -106,7 +103,7 @@ public class GetUserByEmailQueryHandlerTests
         var email = "JOHN@EXAMPLE.COM";
         var query = new GetUserByEmailQuery(email);
         var expectedUser = new User("John Doe", "john@example.com") { Id = Guid.NewGuid() };
-        
+
         _mockRepository.Setup(r => r.GetByEmailAsync(email))
             .Returns(Observable.Return(expectedUser));
 
@@ -119,4 +116,4 @@ public class GetUserByEmailQueryHandlerTests
         Assert.Equal("John Doe", result.Name);
         Assert.Equal("john@example.com", result.Email);
     }
-} 
+}

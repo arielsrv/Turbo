@@ -17,8 +17,8 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     {
         try
         {
-            CreateUserCommand command = new CreateUserCommand(request);
-            UserResponse result = await mediator.Send(command).ToTask();
+            var command = new CreateUserCommand(request);
+            var result = await mediator.Send(command).ToTask();
             return CreatedAtAction(nameof(GetUserById), new { id = result.Id }, result);
         }
         catch (InvalidOperationException ex)
@@ -33,7 +33,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
         try
         {
             var command = new UpdateUserCommand(id, request);
-            var result = await mediator.Send<UserResponse>(command).ToTask();
+            var result = await mediator.Send(command).ToTask();
             return Ok(result);
         }
         catch (InvalidOperationException ex)
@@ -47,10 +47,10 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     {
         var command = new DeleteUserCommand(id);
         var result = await mediator.Send(command).ToTask();
-        
+
         if (!result)
             return NotFound();
-            
+
         return Ok(result);
     }
 
@@ -68,10 +68,10 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     {
         var query = new GetUserByIdQuery(id);
         var result = await mediator.Send(query).ToTask();
-        
+
         if (result == null)
             return NotFound();
-            
+
         return Ok(result);
     }
 
@@ -80,10 +80,10 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     {
         var query = new GetUserByEmailQuery(email);
         var result = await mediator.Send(query).ToTask();
-        
+
         if (result == null)
             return NotFound();
-            
+
         return Ok(result);
     }
-} 
+}
