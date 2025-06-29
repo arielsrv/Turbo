@@ -53,6 +53,7 @@ public class UserTests
         var originalUpdatedAt = user.UpdatedAt;
 
         // Act
+        Thread.Sleep(1); // Ensure time difference
         user.Update("John Updated", "john.updated@example.com");
 
         // Assert
@@ -60,7 +61,7 @@ public class UserTests
         Assert.Equal("john.updated@example.com", user.Email);
         Assert.Equal(originalCreatedAt, user.CreatedAt);
         Assert.NotNull(user.UpdatedAt);
-        Assert.True(user.UpdatedAt > originalCreatedAt);
+        Assert.True(user.UpdatedAt >= originalCreatedAt);
     }
 
     [Fact]

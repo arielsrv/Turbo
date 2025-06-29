@@ -10,8 +10,7 @@
         "dependencies": {
           "MediatR": "12.5.0",
           "Microsoft.AspNetCore.OpenApi": "9.0.6",
-          "System.Reactive": "6.0.0",
-          "System.Reactive.Linq": "6.0.0"
+          "System.Reactive": "6.0.1"
         },
         "runtime": {
           "Turbo.API.dll": {}
@@ -57,27 +56,14 @@
           }
         }
       },
-      "System.Reactive/6.0.0": {
+      "System.Reactive/6.0.1": {
         "runtime": {
           "lib/net6.0/System.Reactive.dll": {
             "assemblyVersion": "6.0.0.0",
-            "fileVersion": "6.0.0.1"
+            "fileVersion": "6.0.1.7420"
           }
         }
-      },
-      "System.Reactive.Linq/6.0.0": {
-        "dependencies": {
-          "System.Reactive": "6.0.0",
-          "System.Threading.Tasks.Extensions": "4.5.4"
-        },
-        "runtime": {
-          "lib/netstandard2.0/System.Reactive.Linq.dll": {
-            "assemblyVersion": "3.0.6000.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
-      "System.Threading.Tasks.Extensions/4.5.4": {}
+      }
     }
   },
   "libraries": {
@@ -121,26 +107,12 @@
       "path": "microsoft.openapi/1.6.17",
       "hashPath": "microsoft.openapi.1.6.17.nupkg.sha512"
     },
-    "System.Reactive/6.0.0": {
+    "System.Reactive/6.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-31kfaW4ZupZzPsI5PVe77VhnvFF55qgma7KZr/E0iFTs6fmdhhG8j0mgEx620iLTey1EynOkEfnyTjtNEpJzGw==",
-      "path": "system.reactive/6.0.0",
-      "hashPath": "system.reactive.6.0.0.nupkg.sha512"
-    },
-    "System.Reactive.Linq/6.0.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-pXI6jCnFDnkFjwS3Er21PbhPco955KC+M6UzSPv/v/UycNHjYRGazYQqLNcqn9P5kgTMVd4bq+9GbhZywVQikQ==",
-      "path": "system.reactive.linq/6.0.0",
-      "hashPath": "system.reactive.linq.6.0.0.nupkg.sha512"
-    },
-    "System.Threading.Tasks.Extensions/4.5.4": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-zteT+G8xuGu6mS+mzDzYXbzS7rd3K6Fjb9RiZlYlJPam2/hU7JCBZBVEcywNuR+oZ1ncTvc/cq0faRr3P01OVg==",
-      "path": "system.threading.tasks.extensions/4.5.4",
-      "hashPath": "system.threading.tasks.extensions.4.5.4.nupkg.sha512"
+      "sha512": "sha512-rHaWtKDwCi9qJ3ObKo8LHPMuuwv33YbmQi7TcUK1C264V3MFnOr5Im7QgCTdLniztP3GJyeiSg5x8NqYJFqRmg==",
+      "path": "system.reactive/6.0.1",
+      "hashPath": "system.reactive.6.0.1.nupkg.sha512"
     }
   }
 }

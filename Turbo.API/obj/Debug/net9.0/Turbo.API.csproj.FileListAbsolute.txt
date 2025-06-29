@@ -9,7 +9,6 @@
 /Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/bin/Debug/net9.0/Microsoft.AspNetCore.OpenApi.dll
 /Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/bin/Debug/net9.0/Microsoft.OpenApi.dll
 /Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/bin/Debug/net9.0/System.Reactive.dll
-/Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/bin/Debug/net9.0/System.Reactive.Linq.dll
 /Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/obj/Debug/net9.0/Turbo.API.csproj.AssemblyReference.cache
 /Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/obj/Debug/net9.0/Turbo.API.GeneratedMSBuildEditorConfig.editorconfig
 /Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/obj/Debug/net9.0/Turbo.API.AssemblyInfoInputs.cache
@@ -35,3 +34,4 @@
 /Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/obj/Debug/net9.0/ref/Turbo.API.dll
 /Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/bin/Debug/net9.0/MediatR.dll
 /Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/bin/Debug/net9.0/MediatR.Contracts.dll
+/Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/obj/Debug/net9.0/Turbo.API.sourcelink.json
