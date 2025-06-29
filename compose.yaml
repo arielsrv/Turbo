@@ -1,0 +1,7 @@
+﻿services:
+  turbo.api:
+    image: turbo.api
+    build:
+      context: .
+      dockerfile: Turbo.API/Dockerfile
+

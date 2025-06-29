@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "dgSpecHash": "et8Wwrlm8yU=",
+  "success": true,
+  "projectFilePath": "/Users/ariel.pineiro/projects/iskaypetcom/cqrs/Turbo/Turbo.API/Turbo.API.csproj",
+  "expectedPackageFiles": [
+    "/Users/ariel.pineiro/.nuget/packages/mediatr/12.5.0/mediatr.12.5.0.nupkg.sha512",
+    "/Users/ariel.pineiro/.nuget/packages/mediatr.contracts/2.0.1/mediatr.contracts.2.0.1.nupkg.sha512",
+    "/Users/ariel.pineiro/.nuget/packages/microsoft.aspnetcore.openapi/9.0.6/microsoft.aspnetcore.openapi.9.0.6.nupkg.sha512",
+    "/Users/ariel.pineiro/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.0/microsoft.extensions.dependencyinjection.abstractions.8.0.0.nupkg.sha512",
+    "/Users/ariel.pineiro/.nuget/packages/microsoft.openapi/1.6.17/microsoft.openapi.1.6.17.nupkg.sha512",
+    "/Users/ariel.pineiro/.nuget/packages/system.reactive/6.0.0/system.reactive.6.0.0.nupkg.sha512",
+    "/Users/ariel.pineiro/.nuget/packages/system.reactive.linq/6.0.0/system.reactive.linq.6.0.0.nupkg.sha512",
+    "/Users/ariel.pineiro/.nuget/packages/system.threading.tasks.extensions/4.5.4/system.threading.tasks.extensions.4.5.4.nupkg.sha512"
+  ],
+  "logs": []
+}

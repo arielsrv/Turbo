@@ -1,0 +1,63 @@
+@Turbo.API_HostAddress = http://localhost:5281
+
+GET {{Turbo.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+
+### Turbo API - CQRS con MediatR y Rx.NET
+### Ejemplos de uso de la API
+
+### 1. Crear un usuario (COMMAND)
+POST https://localhost:7001/api/users
+Content-Type: application/json
+
+{
+  "name": "Juan Pérez",
+  "email": "juan@example.com"
+}
+
+### 2. Crear otro usuario (COMMAND)
+POST https://localhost:7001/api/users
+Content-Type: application/json
+
+{
+  "name": "María García",
+  "email": "maria@example.com"
+}
+
+### 3. Obtener todos los usuarios (QUERY)
+GET https://localhost:7001/api/users
+
+### 4. Obtener usuario por ID (QUERY)
+# Reemplaza {id} con el ID del usuario creado
+GET https://localhost:7001/api/users/{id}
+
+### 5. Obtener usuario por email (QUERY)
+GET https://localhost:7001/api/users/email/juan@example.com
+
+### 6. Actualizar usuario (COMMAND)
+# Reemplaza {id} con el ID del usuario a actualizar
+PUT https://localhost:7001/api/users/{id}
+Content-Type: application/json
+
+{
+  "name": "Juan Pérez Actualizado",
+  "email": "juan.nuevo@example.com"
+}
+
+### 7. Intentar crear usuario con email duplicado (debe fallar)
+POST https://localhost:7001/api/users
+Content-Type: application/json
+
+{
+  "name": "Otro Usuario",
+  "email": "juan@example.com"
+}
+
+### 8. Eliminar usuario (COMMAND)
+# Reemplaza {id} con el ID del usuario a eliminar
+DELETE https://localhost:7001/api/users/{id}
+
+### 9. Verificar que el usuario fue eliminado (QUERY)
+GET https://localhost:7001/api/users/{id}
