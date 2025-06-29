@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="NxDevToolsSettings">
-    <node-interpreter value="project" />
-    <nx-package value="$USER_HOME$/.nvm/versions/node/v16.17.0/lib/node_modules/nx" />
-    <nx.json value="" />
-  </component>
-</project>
