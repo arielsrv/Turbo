@@ -67,7 +67,7 @@ public class InMemoryUserRepositoryTests
         Assert.Equal(user.Id, result.Id);
         Assert.Equal(user.Name, result.Name);
         Assert.Equal(user.Email, result.Email);
-    }
+   }
 
     [Fact]
     public async Task GetByIdAsync_NonExistingUser_ReturnsNull()
@@ -259,5 +259,88 @@ public class InMemoryUserRepositoryTests
         // Assert
         var allUsers = await _repository.GetAllAsync().ToTask();
         Assert.Equal(userCount, allUsers.Count());
+    }
+
+    // --- TESTS PARA FORZAR EXCEPCIONES Y CUBRIR BLOQUES CATCH ---
+    private class ExplodingUser : User
+    {
+        public ExplodingUser() : base("Explode", "explode@example.com") { }
+        public override string Name => throw new Exception("Exploded!");
+    }
+
+    [Fact]
+    public async Task AddAsync_WhenExceptionThrown_PropagatesError()
+    {
+        var repo = new InMemoryUserRepository();
+        var user = new ExplodingUser();
+        var observable = repo.AddAsync(user);
+        var ex = await Assert.ThrowsAsync<Exception>(() => observable.ToTask());
+        Assert.Equal("Exploded!", ex.Message);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_WhenExceptionThrown_PropagatesError()
+    {
+        var repo = new InMemoryUserRepository();
+        // Forzamos excepción usando un mock de lista interna (no posible aquí), así que lanzamos manualmente
+        // Simulamos con un usuario que explota en Equals
+        var id = Guid.NewGuid();
+        var user = new ExplodingUser();
+        typeof(User).GetProperty("Id")!.SetValue(user, id);
+        // Insertamos el usuario en la lista interna usando reflexión para forzar el error
+        var usersField = typeof(InMemoryUserRepository).GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var usersList = (List<User>)usersField!.GetValue(repo)!;
+        usersList.Add(user);
+        // Ahora llamamos y forzamos la excepción
+        var observable = repo.GetByIdAsync(id);
+        var ex = await Assert.ThrowsAsync<Exception>(() => observable.ToTask());
+        Assert.Equal("Exploded!", ex.Message);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenExceptionThrown_PropagatesError()
+    {
+        var repo = new InMemoryUserRepository();
+        var user = new ExplodingUser();
+        // Insertamos el usuario en la lista interna
+        var usersField = typeof(InMemoryUserRepository).GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var usersList = (List<User>)usersField!.GetValue(repo)!;
+        usersList.Add(user);
+        // Ahora llamamos y forzamos la excepción
+        var observable = repo.UpdateAsync(user);
+        var ex = await Assert.ThrowsAsync<Exception>(() => observable.ToTask());
+        Assert.Equal("Exploded!", ex.Message);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WhenExceptionThrown_PropagatesError()
+    {
+        var repo = new InMemoryUserRepository();
+        // Insertamos un usuario que explota y le asignamos el mismo Id
+        var user = new ExplodingUser();
+        var id = Guid.NewGuid();
+        typeof(User).GetProperty("Id")!.SetValue(user, id);
+        var usersField = typeof(InMemoryUserRepository).GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var usersList = (List<User>)usersField!.GetValue(repo)!;
+        usersList.Add(user);
+        // Ahora llamamos y forzamos la excepción
+        var observable = repo.DeleteAsync(id);
+        var ex = await Assert.ThrowsAsync<Exception>(() => observable.ToTask());
+        Assert.Equal("Exploded!", ex.Message);
+    }
+
+    [Fact]
+    public async Task GetByEmailAsync_WhenExceptionThrown_PropagatesError()
+    {
+        var repo = new InMemoryUserRepository();
+        // Insertamos un usuario que explota
+        var user = new ExplodingUser();
+        var usersField = typeof(InMemoryUserRepository).GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var usersList = (List<User>)usersField!.GetValue(repo)!;
+        usersList.Add(user);
+        // Ahora llamamos y forzamos la excepción
+        var observable = repo.GetByEmailAsync(user.Email);
+        var ex = await Assert.ThrowsAsync<Exception>(() => observable.ToTask());
+        Assert.Equal("Exploded!", ex.Message);
     }
 }

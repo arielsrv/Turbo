@@ -11,7 +11,7 @@ public class User
     }
 
     public Guid Id { get; init; }
-    public string Name { get; private set; }
+    public virtual string Name { get; private set; }
     public string Email { get; private set; }
     public DateTime CreatedAt { get; }
     public DateTime? UpdatedAt { get; private set; }
