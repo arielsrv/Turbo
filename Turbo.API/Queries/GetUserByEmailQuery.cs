@@ -16,18 +16,12 @@ public record GetUserByEmailQuery : IRequest<UserResponse?>
     public string Email { get; init; } = string.Empty;
 }
 
-public class GetUserByEmailQueryHandler : IReactiveRequestHandler<GetUserByEmailQuery, UserResponse?>
+public class GetUserByEmailQueryHandler(IUserRepository userRepository)
+    : IReactiveRequestHandler<GetUserByEmailQuery, UserResponse?>
 {
-    private readonly IUserRepository _userRepository;
-
-    public GetUserByEmailQueryHandler(IUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
-
     public IObservable<UserResponse?> Handle(GetUserByEmailQuery request)
     {
-        return _userRepository.GetByEmailAsync(request.Email)
+        return userRepository.GetByEmailAsync(request.Email)
             .Select(user => user == null
                 ? null
                 : new UserResponse(

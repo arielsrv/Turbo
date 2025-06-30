@@ -6,12 +6,7 @@ namespace Turbo.API.Tests.Repositories;
 
 public class InMemoryUserRepositoryTests
 {
-    private readonly InMemoryUserRepository _repository;
-
-    public InMemoryUserRepositoryTests()
-    {
-        _repository = new InMemoryUserRepository();
-    }
+    private readonly InMemoryUserRepository _repository = new();
 
     [Fact]
     public async Task AddAsync_ValidUser_ReturnsUser()

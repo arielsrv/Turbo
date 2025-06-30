@@ -10,26 +10,19 @@ public interface IReactiveMediator
     IObservable<Unit> Publish(object notification, CancellationToken cancellationToken = default);
 }
 
-public class ReactiveMediator : IReactiveMediator
+public class ReactiveMediator(IMediator mediator) : IReactiveMediator
 {
-    private readonly IMediator _mediator;
-
-    public ReactiveMediator(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     public IObservable<TResponse> Send<TResponse>(IRequest<TResponse> request,
         CancellationToken cancellationToken = default)
     {
-        return Observable.FromAsync(() => _mediator.Send(request, cancellationToken));
+        return Observable.FromAsync(() => mediator.Send(request, cancellationToken));
     }
 
     public IObservable<Unit> Publish(object notification, CancellationToken cancellationToken = default)
     {
         return Observable.FromAsync(async () =>
         {
-            await _mediator.Publish(notification, cancellationToken);
+            await mediator.Publish(notification, cancellationToken);
             return Unit.Default;
         });
     }

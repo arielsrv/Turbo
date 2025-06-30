@@ -19,20 +19,14 @@ public record CreateUserCommand : IRequest<UserResponse>
     public string Email { get; init; } = string.Empty;
 }
 
-public class CreateUserCommandHandler : IReactiveRequestHandler<CreateUserCommand, UserResponse>
+public class CreateUserCommandHandler(IUserRepository userRepository)
+    : IReactiveRequestHandler<CreateUserCommand, UserResponse>
 {
-    private readonly IUserRepository _userRepository;
-
-    public CreateUserCommandHandler(IUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
-
     public IObservable<UserResponse> Handle(CreateUserCommand request)
     {
         var user = new User(request.Name, request.Email);
 
-        return _userRepository.AddAsync(user)
+        return userRepository.AddAsync(user)
             .Select(createdUser => new UserResponse(
                 createdUser.Id,
                 createdUser.Name,

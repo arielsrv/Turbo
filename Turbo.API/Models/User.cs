@@ -10,11 +10,11 @@ public class User
         CreatedAt = DateTime.UtcNow;
     }
 
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
+    public Guid Id { get; init; }
+    public string Name { get; private set; }
+    public string Email { get; private set; }
+    public DateTime CreatedAt { get; }
+    public DateTime? UpdatedAt { get; private set; }
 
     public void Update(string name, string email)
     {

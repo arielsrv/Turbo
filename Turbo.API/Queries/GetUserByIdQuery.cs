@@ -6,28 +6,14 @@ using Turbo.API.Repositories;
 
 namespace Turbo.API.Queries;
 
-public record GetUserByIdQuery : IRequest<UserResponse?>
+public record GetUserByIdQuery(Guid Id) : IRequest<UserResponse?>;
+
+public class GetUserByIdQueryHandler(IUserRepository userRepository)
+    : IReactiveRequestHandler<GetUserByIdQuery, UserResponse?>
 {
-    public GetUserByIdQuery(Guid id)
-    {
-        Id = id;
-    }
-
-    public Guid Id { get; init; }
-}
-
-public class GetUserByIdQueryHandler : IReactiveRequestHandler<GetUserByIdQuery, UserResponse?>
-{
-    private readonly IUserRepository _userRepository;
-
-    public GetUserByIdQueryHandler(IUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
-
     public IObservable<UserResponse?> Handle(GetUserByIdQuery request)
     {
-        return _userRepository.GetByIdAsync(request.Id)
+        return userRepository.GetByIdAsync(request.Id)
             .Select(user => user == null
                 ? null
                 : new UserResponse(

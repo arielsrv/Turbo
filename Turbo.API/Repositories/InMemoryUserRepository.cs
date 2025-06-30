@@ -5,8 +5,8 @@ namespace Turbo.API.Repositories;
 
 public class InMemoryUserRepository : IUserRepository
 {
-    private readonly object _lock = new();
-    private readonly List<User> _users = new();
+    private readonly Lock _lock = new();
+    private readonly List<User> _users = [];
 
     public IObservable<User> AddAsync(User user)
     {

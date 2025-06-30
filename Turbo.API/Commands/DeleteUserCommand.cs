@@ -4,27 +4,12 @@ using Turbo.API.Repositories;
 
 namespace Turbo.API.Commands;
 
-public record DeleteUserCommand : IRequest<bool>
+public record DeleteUserCommand(Guid Id) : IRequest<bool>;
+
+public class DeleteUserCommandHandler(IUserRepository userRepository) : IReactiveRequestHandler<DeleteUserCommand, bool>
 {
-    public DeleteUserCommand(Guid id)
-    {
-        Id = id;
-    }
-
-    public Guid Id { get; init; }
-}
-
-public class DeleteUserCommandHandler : IReactiveRequestHandler<DeleteUserCommand, bool>
-{
-    private readonly IUserRepository _userRepository;
-
-    public DeleteUserCommandHandler(IUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
-
     public IObservable<bool> Handle(DeleteUserCommand request)
     {
-        return _userRepository.DeleteAsync(request.Id);
+        return userRepository.DeleteAsync(request.Id);
     }
 }

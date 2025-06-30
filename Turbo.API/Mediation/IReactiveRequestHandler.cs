@@ -2,7 +2,7 @@ using System.Reactive;
 
 namespace Turbo.API.Mediation;
 
-public interface IReactiveRequestHandler<in TRequest, TResponse>
+public interface IReactiveRequestHandler<in TRequest, out TResponse>
 {
     IObservable<TResponse> Handle(TRequest request);
 }

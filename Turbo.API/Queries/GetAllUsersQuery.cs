@@ -8,18 +8,12 @@ namespace Turbo.API.Queries;
 
 public record GetAllUsersQuery : IRequest<UsersResponse>;
 
-public class GetAllUsersQueryHandler : IReactiveRequestHandler<GetAllUsersQuery, UsersResponse>
+public class GetAllUsersQueryHandler(IUserRepository userRepository)
+    : IReactiveRequestHandler<GetAllUsersQuery, UsersResponse>
 {
-    private readonly IUserRepository _userRepository;
-
-    public GetAllUsersQueryHandler(IUserRepository userRepository)
-    {
-        _userRepository = userRepository;
-    }
-
     public IObservable<UsersResponse> Handle(GetAllUsersQuery request)
     {
-        return _userRepository.GetAllAsync()
+        return userRepository.GetAllAsync()
             .Select(users => new UsersResponse(
                 users.Select(user => new UserResponse(
                     user.Id,
