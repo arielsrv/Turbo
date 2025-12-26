@@ -233,18 +233,19 @@ public class ReactiveMediatorTests
     {
         // Arrange
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
-        var expectedResponse =
-            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
+        var expectedResponse = new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow);
         var capturedToken = CancellationToken.None;
 
-        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
-            .Callback<IRequest<GetUserResponse>, CancellationToken>((_, ct) => capturedToken = ct)
+        _mockMediator
+            .Setup(mediator => mediator.Send(command, It.IsAny<CancellationToken>()))
+            .Callback<IRequest<GetUserResponse>, CancellationToken>((_, cancellationToken) =>
+                capturedToken = cancellationToken)
             .ReturnsAsync(expectedResponse);
 
-        var cts = new CancellationTokenSource();
+        var cancellationTokenSource = new CancellationTokenSource();
 
         // Act
-        await _reactiveMediator.Send(command).ToTask(cts.Token);
+        await _reactiveMediator.Send(command).ToTask(cancellationTokenSource.Token);
 
         // Assert
         Assert.True(capturedToken.CanBeCanceled, "CancellationToken should be cancellable");
