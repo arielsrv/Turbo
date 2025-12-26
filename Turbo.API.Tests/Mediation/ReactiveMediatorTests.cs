@@ -6,7 +6,6 @@ using Turbo.API.Commands;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
 using Turbo.API.Queries;
-using Unit = System.Reactive.Unit;
 
 namespace Turbo.API.Tests.Mediation;
 
@@ -100,7 +99,7 @@ public class ReactiveMediatorTests
         var result = await _reactiveMediator.Publish(notification).ToTask();
 
         // Assert
-        Assert.Equal(Unit.Default, result);
+        Assert.Equal(System.Reactive.Unit.Default, result);
         _mockMediator.Verify(m => m.Publish(notification, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -136,7 +135,7 @@ public class ReactiveMediatorTests
         var result = await _reactiveMediator.Publish(notification).ToTask(cancellationToken);
 
         // Assert
-        Assert.Equal(Unit.Default, result);
+        Assert.Equal(System.Reactive.Unit.Default, result);
         _mockMediator.Verify(m => m.Publish(notification, It.IsAny<CancellationToken>()), Times.Once);
     }
 
