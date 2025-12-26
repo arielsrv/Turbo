@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Reactive.Linq;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -38,8 +37,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var expectedResponse =
             new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<CreateUserCommand>()))
-            .Returns(Observable.Return(expectedResponse));
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
 
         // Act
         var response = await client.PostAsJsonAsync("/api/users", request);
@@ -61,8 +60,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var request = new CreateUserRequest("John Doe", "john@example.com");
         var exception = new InvalidOperationException("User with email john@example.com already exists");
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<CreateUserCommand>()))
-            .Returns(Observable.Throw<GetUserResponse>(exception));
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(exception);
 
         // Act
         var response = await client.PostAsJsonAsync("/api/users", request);
@@ -81,8 +80,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var userId = Guid.NewGuid();
         var expectedResponse = new GetUserResponse(userId, "John Doe", "john@example.com", DateTime.UtcNow, null);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>()))
-            .Returns(Observable.Return<GetUserResponse?>(expectedResponse));
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
 
         // Act
         var response = await client.GetAsync($"/api/users/{userId}");
@@ -101,8 +100,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>()))
-            .Returns(Observable.Return<GetUserResponse?>(null));
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((GetUserResponse?)null);
 
         // Act
         var response = await client.GetAsync($"/api/users/{userId}");
@@ -123,8 +122,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         };
         var expectedResponse = new GetUsersResponse(users);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<GetAllUsersQuery>()))
-            .Returns(Observable.Return(expectedResponse));
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
 
         // Act
         var response = await client.GetAsync("/api/users");
@@ -146,8 +145,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var expectedResponse = new GetUserResponse(userId, "John Updated", "john.updated@example.com", DateTime.UtcNow,
             DateTime.UtcNow);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<UpdateUserCommand>()))
-            .Returns(Observable.Return(expectedResponse));
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<UpdateUserCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
 
         // Act
         var response = await client.PutAsJsonAsync($"/api/users/{userId}", request);
@@ -167,8 +166,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>()))
-            .Returns(Observable.Return(true));
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<DeleteUserCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
 
         // Act
         var response = await client.DeleteAsync($"/api/users/{userId}");
@@ -186,8 +185,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>()))
-            .Returns(Observable.Return(false));
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<DeleteUserCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(false);
 
         // Act
         var response = await client.DeleteAsync($"/api/users/{userId}");
@@ -204,8 +203,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var email = "john@example.com";
         var expectedResponse = new GetUserResponse(Guid.NewGuid(), "John Doe", email, DateTime.UtcNow, null);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByEmailQuery>()))
-            .Returns(Observable.Return<GetUserResponse?>(expectedResponse));
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetUserByEmailQuery>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(expectedResponse);
 
         // Act
         var response = await client.GetAsync($"/api/users/email/{email}");
@@ -224,8 +223,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var cts = new CancellationTokenSource();
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<GetAllUsersQuery>()))
-            .Returns(Observable.Never<GetUsersResponse>());
+        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
+            .Returns<GetAllUsersQuery, CancellationToken>((_, ct) => Task.Delay(Timeout.Infinite, ct).ContinueWith<GetUsersResponse>(_ => throw new TaskCanceledException()));
 
         // Act
         await cts.CancelAsync();

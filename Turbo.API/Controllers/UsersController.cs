@@ -1,4 +1,3 @@
-using System.Reactive.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Turbo.API.Commands;
 using Turbo.API.DTOs;
@@ -20,7 +19,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
         try
         {
             var command = new CreateUserCommand(request);
-            var result = await mediator.Send(command).ToTask(cancellationToken);
+            var result = await mediator.SendAsync(command, cancellationToken);
             return CreatedAtAction(nameof(GetUserById), new { id = result.Id }, result);
         }
         catch (InvalidOperationException ex)
@@ -38,7 +37,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
         try
         {
             var command = new UpdateUserCommand(id, request);
-            var result = await mediator.Send(command).ToTask(cancellationToken);
+            var result = await mediator.SendAsync(command, cancellationToken);
             return Ok(result);
         }
         catch (InvalidOperationException ex)
@@ -51,7 +50,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     public async Task<ActionResult<bool>> DeleteUser(Guid id, CancellationToken cancellationToken)
     {
         var command = new DeleteUserCommand(id);
-        var result = await mediator.Send(command).ToTask(cancellationToken);
+        var result = await mediator.SendAsync(command, cancellationToken);
 
         if (!result)
             return NotFound();
@@ -64,7 +63,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     public async Task<ActionResult<GetUsersResponse>> GetAllUsers(CancellationToken cancellationToken)
     {
         var query = new GetAllUsersQuery();
-        var result = await mediator.Send(query).ToTask(cancellationToken);
+        var result = await mediator.SendAsync(query, cancellationToken);
         return Ok(result);
     }
 
@@ -72,7 +71,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     public async Task<ActionResult<GetUserResponse>> GetUserById(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetUserByIdQuery(id);
-        var result = await mediator.Send(query).ToTask(cancellationToken);
+        var result = await mediator.SendAsync(query, cancellationToken);
 
         if (result == null)
             return NotFound();
@@ -84,7 +83,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     public async Task<ActionResult<GetUserResponse>> GetUserByEmail(string email, CancellationToken cancellationToken)
     {
         var query = new GetUserByEmailQuery(email);
-        var result = await mediator.Send(query).ToTask(cancellationToken);
+        var result = await mediator.SendAsync(query, cancellationToken);
 
         if (result == null)
             return NotFound();
