@@ -224,7 +224,9 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var cts = new CancellationTokenSource();
 
         _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
-            .Returns<GetAllUsersQuery, CancellationToken>((_, ct) => Task.Delay(Timeout.Infinite, ct).ContinueWith<GetUsersResponse>(_ => throw new TaskCanceledException()));
+            .Returns<GetAllUsersQuery, CancellationToken>((_, ct) =>
+                Task.Delay(Timeout.Infinite, ct)
+                    .ContinueWith<GetUsersResponse>(_ => throw new TaskCanceledException(), ct));
 
         // Act
         await cts.CancelAsync();

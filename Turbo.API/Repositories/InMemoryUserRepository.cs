@@ -24,7 +24,7 @@ public class InMemoryUserRepository : IUserRepository
                     }
 #if DEBUG
                     // Forzar acceso a propiedad para cobertura de tests
-                    var _ = user.Name;
+                    _ = user.Name;
 #endif
                     _users.Add(user);
                     observer.OnNext(user);
@@ -52,7 +52,7 @@ public class InMemoryUserRepository : IUserRepository
 #if DEBUG
                     if (user != null)
                     {
-                        var _ = user.Name;
+                        _ = user.Name;
                     }
 #endif
                     observer.OnNext(user);
@@ -105,7 +105,7 @@ public class InMemoryUserRepository : IUserRepository
                         return () => { };
                     }
 #if DEBUG
-                    var _ = user.Name;
+                    _ = user.Name;
 #endif
                     // Verificar que el email no esté duplicado (excluyendo el usuario actual)
                     if (_users.Any(u =>
@@ -142,7 +142,7 @@ public class InMemoryUserRepository : IUserRepository
 #if DEBUG
                     if (user != null)
                     {
-                        var _ = user.Name;
+                        _ = user.Name;
                     }
 #endif
                     if (user == null)
@@ -154,7 +154,7 @@ public class InMemoryUserRepository : IUserRepository
 
                     // Acceso a Name antes de eliminar para cobertura
 #if DEBUG
-                    var __ = user.Name;
+                    _ = user.Name;
 #endif
                     var removed = _users.Remove(user);
                     observer.OnNext(removed);
@@ -182,7 +182,7 @@ public class InMemoryUserRepository : IUserRepository
 #if DEBUG
                     if (user != null)
                     {
-                        var _ = user.Name;
+                        _ = user.Name;
                     }
 #endif
                     observer.OnNext(user);

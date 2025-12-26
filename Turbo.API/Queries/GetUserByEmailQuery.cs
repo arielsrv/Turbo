@@ -13,7 +13,7 @@ public record GetUserByEmailQuery : IRequest<GetUserResponse?>
         Email = email;
     }
 
-    public string Email { get; init; } = string.Empty;
+    public string Email { get; } = string.Empty;
 }
 
 public class GetUserByEmailQueryHandler(IUserRepository userRepository)

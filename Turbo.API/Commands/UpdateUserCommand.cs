@@ -15,9 +15,9 @@ public record UpdateUserCommand : IRequest<GetUserResponse>
         Email = request.Email;
     }
 
-    public Guid Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public string Email { get; init; } = string.Empty;
+    public Guid Id { get; }
+    public string Name { get; } = string.Empty;
+    public string Email { get; } = string.Empty;
 }
 
 public class UpdateUserCommandHandler(IUserRepository userRepository)
