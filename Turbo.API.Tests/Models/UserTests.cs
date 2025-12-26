@@ -49,7 +49,6 @@ public class UserTests
         // Arrange
         var user = new User("John Doe", "john@example.com");
         var originalCreatedAt = user.CreatedAt;
-        var originalUpdatedAt = user.UpdatedAt;
 
         // Act
         Thread.Sleep(1); // Ensure time difference

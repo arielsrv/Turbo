@@ -57,10 +57,9 @@ public class GetAllUsersQueryHandlerTests
     {
         // Arrange
         var query = new GetAllUsersQuery();
-        var emptyUsers = new List<User>();
 
         _mockRepository.Setup(r => r.GetAllAsync())
-            .Returns(Observable.Return<IEnumerable<User>>(emptyUsers));
+            .Returns(Observable.Return<IEnumerable<User>>(new List<User>()));
 
         // Act
         var result = await _handler.Handle(query).ToTask();
