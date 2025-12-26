@@ -6,7 +6,6 @@ using Turbo.API.Queries;
 
 namespace Turbo.API.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
 public class UsersController(IReactiveMediator mediator) : ControllerBase
 {
