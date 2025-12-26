@@ -18,8 +18,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     {
         try
         {
-            var command = new CreateUserCommand(request);
-            var result = await mediator.SendAsync(command, cancellationToken);
+            var result = await mediator.SendAsync(new CreateUserCommand(request), cancellationToken);
             return CreatedAtAction(nameof(GetUserById), new { id = result.Id }, result);
         }
         catch (InvalidOperationException ex)
@@ -36,8 +35,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     {
         try
         {
-            var command = new UpdateUserCommand(id, request);
-            var result = await mediator.SendAsync(command, cancellationToken);
+            var result = await mediator.SendAsync(new UpdateUserCommand(id, request), cancellationToken);
             return Ok(result);
         }
         catch (InvalidOperationException ex)
@@ -49,8 +47,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult<bool>> DeleteUser(Guid id, CancellationToken cancellationToken)
     {
-        var command = new DeleteUserCommand(id);
-        var result = await mediator.SendAsync(command, cancellationToken);
+        var result = await mediator.SendAsync(new DeleteUserCommand(id), cancellationToken);
 
         if (!result)
             return NotFound();
@@ -62,16 +59,14 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     [HttpGet]
     public async Task<ActionResult<GetUsersResponse>> GetAllUsers(CancellationToken cancellationToken)
     {
-        var query = new GetAllUsersQuery();
-        var result = await mediator.SendAsync(query, cancellationToken);
+        var result = await mediator.SendAsync(new GetAllUsersQuery(), cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<GetUserResponse>> GetUserById(Guid id, CancellationToken cancellationToken)
     {
-        var query = new GetUserByIdQuery(id);
-        var result = await mediator.SendAsync(query, cancellationToken);
+        var result = await mediator.SendAsync(new GetUserByIdQuery(id), cancellationToken);
 
         if (result == null)
             return NotFound();
@@ -82,8 +77,7 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     [HttpGet("email/{email}")]
     public async Task<ActionResult<GetUserResponse>> GetUserByEmail(string email, CancellationToken cancellationToken)
     {
-        var query = new GetUserByEmailQuery(email);
-        var result = await mediator.SendAsync(query, cancellationToken);
+        var result = await mediator.SendAsync(new GetUserByEmailQuery(email), cancellationToken);
 
         if (result == null)
             return NotFound();
