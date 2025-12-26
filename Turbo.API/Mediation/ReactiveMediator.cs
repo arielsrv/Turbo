@@ -1,7 +1,6 @@
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using MediatR;
-using Unit = System.Reactive.Unit;
 
 namespace Turbo.API.Mediation;
 
@@ -11,17 +10,17 @@ public interface IReactiveMediator
     /// Sends a request and returns an IObservable for reactive composition.
     /// </summary>
     IObservable<TResponse> Send<TResponse>(IRequest<TResponse> request);
-    
+
     /// <summary>
     /// Sends a request and returns a Task directly (convenience method for controllers).
     /// </summary>
     Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
-    
+
     /// <summary>
     /// Publishes a notification and returns an IObservable for reactive composition.
     /// </summary>
-    IObservable<Unit> Publish(object notification);
-    
+    IObservable<System.Reactive.Unit> Publish(object notification);
+
     /// <summary>
     /// Publishes a notification and returns a Task directly (convenience method for controllers).
     /// </summary>
@@ -32,20 +31,21 @@ public class ReactiveMediator(IMediator mediator) : IReactiveMediator
 {
     public IObservable<TResponse> Send<TResponse>(IRequest<TResponse> request)
     {
-        return Observable.FromAsync(ct => mediator.Send(request, ct));
+        return Observable.FromAsync(cancellationToken => mediator.Send(request, cancellationToken));
     }
 
-    public Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default)
+    public Task<TResponse> SendAsync<TResponse>(IRequest<TResponse> request,
+        CancellationToken cancellationToken = default)
     {
         return Send(request).ToTask(cancellationToken);
     }
 
-    public IObservable<Unit> Publish(object notification)
+    public IObservable<System.Reactive.Unit> Publish(object notification)
     {
-        return Observable.FromAsync(async ct =>
+        return Observable.FromAsync(async cancellationToken =>
         {
-            await mediator.Publish(notification, ct);
-            return Unit.Default;
+            await mediator.Publish(notification, cancellationToken);
+            return System.Reactive.Unit.Default;
         });
     }
 
