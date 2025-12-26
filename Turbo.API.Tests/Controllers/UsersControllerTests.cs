@@ -216,4 +216,21 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         Assert.NotNull(result);
         Assert.Equal(email, result.Email);
     }
+
+    [Fact]
+    public async Task GetAllUsers_WhenCancelled_ThrowsOperationCancelledException()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var cts = new CancellationTokenSource();
+
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetAllUsersQuery>()))
+            .Returns(Observable.Never<GetUsersResponse>());
+
+        // Act
+        await cts.CancelAsync();
+
+        // Assert
+        await Assert.ThrowsAsync<TaskCanceledException>(() => client.GetAsync("/api/users", cts.Token));
+    }
 }

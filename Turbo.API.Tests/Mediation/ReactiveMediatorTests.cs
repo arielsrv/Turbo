@@ -74,7 +74,7 @@ public class ReactiveMediatorTests
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
         var expectedResponse =
             new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
-        var cancellationToken = new CancellationToken();
+        var cancellationToken = CancellationToken.None;
 
         _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
@@ -127,7 +127,7 @@ public class ReactiveMediatorTests
     {
         // Arrange
         var notification = new object();
-        var cancellationToken = new CancellationToken();
+        var cancellationToken = CancellationToken.None;
 
         _mockMediator.Setup(m => m.Publish(notification, It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
@@ -174,5 +174,80 @@ public class ReactiveMediatorTests
         // Assert
         Assert.Null(result);
         _mockMediator.Verify(m => m.Send(query, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Send_WhenCancelled_ThrowsOperationCancelledException()
+    {
+        // Arrange
+        var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
+        var cts = new CancellationTokenSource();
+
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
+            .Returns(async (CreateUserCommand _, CancellationToken ct) =>
+            {
+                await Task.Delay(Timeout.Infinite, ct);
+                return new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
+            });
+
+        // Act
+        var task = _reactiveMediator.Send(command).ToTask(cts.Token);
+        await cts.CancelAsync();
+
+        // Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
+    }
+
+    [Fact]
+    public async Task Send_WhenAlreadyCancelled_ThrowsImmediately()
+    {
+        // Arrange
+        var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
+        var cts = new CancellationTokenSource();
+        await cts.CancelAsync();
+
+        // Act & Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+            _reactiveMediator.Send(command).ToTask(cts.Token));
+    }
+
+    [Fact]
+    public async Task Publish_WhenCancelled_ThrowsOperationCancelledException()
+    {
+        // Arrange
+        var notification = new object();
+        var cts = new CancellationTokenSource();
+
+        _mockMediator.Setup(m => m.Publish(notification, It.IsAny<CancellationToken>()))
+            .Returns(async (object _, CancellationToken ct) => { await Task.Delay(Timeout.Infinite, ct); });
+
+        // Act
+        var task = _reactiveMediator.Publish(notification).ToTask(cts.Token);
+        await cts.CancelAsync();
+
+        // Assert
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
+    }
+
+    [Fact]
+    public async Task Send_CancellationTokenIsPassedToMediator()
+    {
+        // Arrange
+        var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
+        var expectedResponse =
+            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
+        var capturedToken = CancellationToken.None;
+
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
+            .Callback<IRequest<GetUserResponse>, CancellationToken>((_, ct) => capturedToken = ct)
+            .ReturnsAsync(expectedResponse);
+
+        var cts = new CancellationTokenSource();
+
+        // Act
+        await _reactiveMediator.Send(command).ToTask(cts.Token);
+
+        // Assert
+        Assert.True(capturedToken.CanBeCanceled, "CancellationToken should be cancellable");
     }
 }
