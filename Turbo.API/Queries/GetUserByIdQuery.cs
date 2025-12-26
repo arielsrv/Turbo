@@ -6,17 +6,17 @@ using Turbo.API.Repositories;
 
 namespace Turbo.API.Queries;
 
-public record GetUserByIdQuery(Guid Id) : IRequest<UserResponse?>;
+public record GetUserByIdQuery(Guid Id) : IRequest<GetUserResponse?>;
 
 public class GetUserByIdQueryHandler(IUserRepository userRepository)
-    : IReactiveRequestHandler<GetUserByIdQuery, UserResponse?>
+    : IReactiveRequestHandler<GetUserByIdQuery, GetUserResponse?>
 {
-    public IObservable<UserResponse?> Handle(GetUserByIdQuery request)
+    public IObservable<GetUserResponse?> Handle(GetUserByIdQuery request)
     {
         return userRepository.GetByIdAsync(request.Id)
             .Select(user => user == null
                 ? null
-                : new UserResponse(
+                : new GetUserResponse(
                     user.Id,
                     user.Name,
                     user.Email,

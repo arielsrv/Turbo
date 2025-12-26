@@ -6,16 +6,16 @@ using Turbo.API.Repositories;
 
 namespace Turbo.API.Queries;
 
-public record GetAllUsersQuery : IRequest<UsersResponse>;
+public record GetAllUsersQuery : IRequest<GetUsersResponse>;
 
 public class GetAllUsersQueryHandler(IUserRepository userRepository)
-    : IReactiveRequestHandler<GetAllUsersQuery, UsersResponse>
+    : IReactiveRequestHandler<GetAllUsersQuery, GetUsersResponse>
 {
-    public IObservable<UsersResponse> Handle(GetAllUsersQuery request)
+    public IObservable<GetUsersResponse> Handle(GetAllUsersQuery request)
     {
         return userRepository.GetAllAsync()
-            .Select(users => new UsersResponse(
-                users.Select(user => new UserResponse(
+            .Select(users => new GetUsersResponse(
+                users.Select(user => new GetUserResponse(
                     user.Id,
                     user.Name,
                     user.Email,

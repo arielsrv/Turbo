@@ -1,4 +1,5 @@
 using System.Reactive.Threading.Tasks;
+using System.Reflection;
 using Turbo.API.Models;
 using Turbo.API.Repositories;
 
@@ -67,7 +68,7 @@ public class InMemoryUserRepositoryTests
         Assert.Equal(user.Id, result.Id);
         Assert.Equal(user.Name, result.Name);
         Assert.Equal(user.Email, result.Email);
-   }
+    }
 
     [Fact]
     public async Task GetByIdAsync_NonExistingUser_ReturnsNull()
@@ -261,13 +262,6 @@ public class InMemoryUserRepositoryTests
         Assert.Equal(userCount, allUsers.Count());
     }
 
-    // --- TESTS PARA FORZAR EXCEPCIONES Y CUBRIR BLOQUES CATCH ---
-    private class ExplodingUser : User
-    {
-        public ExplodingUser() : base("Explode", "explode@example.com") { }
-        public override string Name => throw new Exception("Exploded!");
-    }
-
     [Fact]
     public async Task AddAsync_WhenExceptionThrown_PropagatesError()
     {
@@ -288,7 +282,8 @@ public class InMemoryUserRepositoryTests
         var user = new ExplodingUser();
         typeof(User).GetProperty("Id")!.SetValue(user, id);
         // Insertamos el usuario en la lista interna usando reflexión para forzar el error
-        var usersField = typeof(InMemoryUserRepository).GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var usersField = typeof(InMemoryUserRepository).GetField("_users",
+            BindingFlags.NonPublic | BindingFlags.Instance);
         var usersList = (List<User>)usersField!.GetValue(repo)!;
         usersList.Add(user);
         // Ahora llamamos y forzamos la excepción
@@ -303,7 +298,8 @@ public class InMemoryUserRepositoryTests
         var repo = new InMemoryUserRepository();
         var user = new ExplodingUser();
         // Insertamos el usuario en la lista interna
-        var usersField = typeof(InMemoryUserRepository).GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var usersField = typeof(InMemoryUserRepository).GetField("_users",
+            BindingFlags.NonPublic | BindingFlags.Instance);
         var usersList = (List<User>)usersField!.GetValue(repo)!;
         usersList.Add(user);
         // Ahora llamamos y forzamos la excepción
@@ -320,7 +316,8 @@ public class InMemoryUserRepositoryTests
         var user = new ExplodingUser();
         var id = Guid.NewGuid();
         typeof(User).GetProperty("Id")!.SetValue(user, id);
-        var usersField = typeof(InMemoryUserRepository).GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var usersField = typeof(InMemoryUserRepository).GetField("_users",
+            BindingFlags.NonPublic | BindingFlags.Instance);
         var usersList = (List<User>)usersField!.GetValue(repo)!;
         usersList.Add(user);
         // Ahora llamamos y forzamos la excepción
@@ -335,12 +332,23 @@ public class InMemoryUserRepositoryTests
         var repo = new InMemoryUserRepository();
         // Insertamos un usuario que explota
         var user = new ExplodingUser();
-        var usersField = typeof(InMemoryUserRepository).GetField("_users", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var usersField = typeof(InMemoryUserRepository).GetField("_users",
+            BindingFlags.NonPublic | BindingFlags.Instance);
         var usersList = (List<User>)usersField!.GetValue(repo)!;
         usersList.Add(user);
         // Ahora llamamos y forzamos la excepción
         var observable = repo.GetByEmailAsync(user.Email);
         var ex = await Assert.ThrowsAsync<Exception>(() => observable.ToTask());
         Assert.Equal("Exploded!", ex.Message);
+    }
+
+    // --- TESTS PARA FORZAR EXCEPCIONES Y CUBRIR BLOQUES CATCH ---
+    private class ExplodingUser : User
+    {
+        public ExplodingUser() : base("Explode", "explode@example.com")
+        {
+        }
+
+        public override string Name => throw new Exception("Exploded!");
     }
 }

@@ -26,16 +26,16 @@ public class Program
 
         // Register handlers
         builder.Services
-            .AddTransient<IReactiveRequestHandler<CreateUserCommand, UserResponse>, CreateUserCommandHandler>();
+            .AddTransient<IReactiveRequestHandler<CreateUserCommand, GetUserResponse>, CreateUserCommandHandler>();
         builder.Services
-            .AddTransient<IReactiveRequestHandler<UpdateUserCommand, UserResponse>, UpdateUserCommandHandler>();
+            .AddTransient<IReactiveRequestHandler<UpdateUserCommand, GetUserResponse>, UpdateUserCommandHandler>();
         builder.Services.AddTransient<IReactiveRequestHandler<DeleteUserCommand, bool>, DeleteUserCommandHandler>();
         builder.Services
-            .AddTransient<IReactiveRequestHandler<GetUserByIdQuery, UserResponse?>, GetUserByIdQueryHandler>();
+            .AddTransient<IReactiveRequestHandler<GetUserByIdQuery, GetUserResponse?>, GetUserByIdQueryHandler>();
         builder.Services
-            .AddTransient<IReactiveRequestHandler<GetAllUsersQuery, UsersResponse>, GetAllUsersQueryHandler>();
+            .AddTransient<IReactiveRequestHandler<GetAllUsersQuery, GetUsersResponse>, GetAllUsersQueryHandler>();
         builder.Services
-            .AddTransient<IReactiveRequestHandler<GetUserByEmailQuery, UserResponse?>, GetUserByEmailQueryHandler>();
+            .AddTransient<IReactiveRequestHandler<GetUserByEmailQuery, GetUserResponse?>, GetUserByEmailQueryHandler>();
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();

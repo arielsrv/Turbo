@@ -6,7 +6,7 @@ using Turbo.API.Repositories;
 
 namespace Turbo.API.Commands;
 
-public record UpdateUserCommand : IRequest<UserResponse>
+public record UpdateUserCommand : IRequest<GetUserResponse>
 {
     public UpdateUserCommand(Guid id, UpdateUserRequest request)
     {
@@ -21,9 +21,9 @@ public record UpdateUserCommand : IRequest<UserResponse>
 }
 
 public class UpdateUserCommandHandler(IUserRepository userRepository)
-    : IReactiveRequestHandler<UpdateUserCommand, UserResponse>
+    : IReactiveRequestHandler<UpdateUserCommand, GetUserResponse>
 {
-    public IObservable<UserResponse> Handle(UpdateUserCommand request)
+    public IObservable<GetUserResponse> Handle(UpdateUserCommand request)
     {
         return userRepository.GetByIdAsync(request.Id)
             .SelectMany(existingUser =>
@@ -33,7 +33,7 @@ public class UpdateUserCommandHandler(IUserRepository userRepository)
                 existingUser.Update(request.Name, request.Email);
                 return userRepository.UpdateAsync(existingUser);
             })
-            .Select(updatedUser => new UserResponse(
+            .Select(updatedUser => new GetUserResponse(
                 updatedUser.Id,
                 updatedUser.Name,
                 updatedUser.Email,

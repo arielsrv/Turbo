@@ -6,23 +6,22 @@ namespace Turbo.API.Mediation;
 
 public interface IReactiveMediator
 {
-    IObservable<TResponse> Send<TResponse>(IRequest<TResponse> request, CancellationToken cancellationToken = default);
-    IObservable<Unit> Publish(object notification, CancellationToken cancellationToken = default);
+    IObservable<TResponse> Send<TResponse>(IRequest<TResponse> request);
+    IObservable<Unit> Publish(object notification);
 }
 
 public class ReactiveMediator(IMediator mediator) : IReactiveMediator
 {
-    public IObservable<TResponse> Send<TResponse>(IRequest<TResponse> request,
-        CancellationToken cancellationToken = default)
+    public IObservable<TResponse> Send<TResponse>(IRequest<TResponse> request)
     {
-        return Observable.FromAsync(() => mediator.Send(request, cancellationToken));
+        return Observable.FromAsync(ct => mediator.Send(request, ct));
     }
 
-    public IObservable<Unit> Publish(object notification, CancellationToken cancellationToken = default)
+    public IObservable<Unit> Publish(object notification)
     {
-        return Observable.FromAsync(async () =>
+        return Observable.FromAsync(async ct =>
         {
-            await mediator.Publish(notification, cancellationToken);
+            await mediator.Publish(notification, ct);
             return Unit.Default;
         });
     }

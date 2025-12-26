@@ -35,9 +35,10 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         // Arrange
         var client = _factory.CreateClient();
         var request = new CreateUserRequest("John Doe", "john@example.com");
-        var expectedResponse = new UserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
+        var expectedResponse =
+            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<CreateUserCommand>(), CancellationToken.None))
+        _mockMediator.Setup(m => m.Send(It.IsAny<CreateUserCommand>()))
             .Returns(Observable.Return(expectedResponse));
 
         // Act
@@ -45,7 +46,7 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
 
         // Assert
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        var result = await response.Content.ReadFromJsonAsync<UserResponse>();
+        var result = await response.Content.ReadFromJsonAsync<GetUserResponse>();
         Assert.NotNull(result);
         Assert.Equal(expectedResponse.Id, result.Id);
         Assert.Equal(expectedResponse.Name, result.Name);
@@ -60,8 +61,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var request = new CreateUserRequest("John Doe", "john@example.com");
         var exception = new InvalidOperationException("User with email john@example.com already exists");
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<CreateUserCommand>(), CancellationToken.None))
-            .Returns(Observable.Throw<UserResponse>(exception));
+        _mockMediator.Setup(m => m.Send(It.IsAny<CreateUserCommand>()))
+            .Returns(Observable.Throw<GetUserResponse>(exception));
 
         // Act
         var response = await client.PostAsJsonAsync("/api/users", request);
@@ -78,17 +79,17 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         // Arrange
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
-        var expectedResponse = new UserResponse(userId, "John Doe", "john@example.com", DateTime.UtcNow, null);
+        var expectedResponse = new GetUserResponse(userId, "John Doe", "john@example.com", DateTime.UtcNow, null);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>(), CancellationToken.None))
-            .Returns(Observable.Return<UserResponse?>(expectedResponse));
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>()))
+            .Returns(Observable.Return<GetUserResponse?>(expectedResponse));
 
         // Act
         var response = await client.GetAsync($"/api/users/{userId}");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var result = await response.Content.ReadFromJsonAsync<UserResponse>();
+        var result = await response.Content.ReadFromJsonAsync<GetUserResponse>();
         Assert.NotNull(result);
         Assert.Equal(userId, result.Id);
     }
@@ -100,8 +101,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>(), CancellationToken.None))
-            .Returns(Observable.Return<UserResponse?>(null));
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByIdQuery>()))
+            .Returns(Observable.Return<GetUserResponse?>(null));
 
         // Act
         var response = await client.GetAsync($"/api/users/{userId}");
@@ -115,14 +116,14 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
     {
         // Arrange
         var client = _factory.CreateClient();
-        var users = new List<UserResponse>
+        var users = new List<GetUserResponse>
         {
             new(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null),
             new(Guid.NewGuid(), "Jane Smith", "jane@example.com", DateTime.UtcNow, null)
         };
-        var expectedResponse = new UsersResponse(users);
+        var expectedResponse = new GetUsersResponse(users);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<GetAllUsersQuery>(), CancellationToken.None))
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetAllUsersQuery>()))
             .Returns(Observable.Return(expectedResponse));
 
         // Act
@@ -130,7 +131,7 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var result = await response.Content.ReadFromJsonAsync<UsersResponse>();
+        var result = await response.Content.ReadFromJsonAsync<GetUsersResponse>();
         Assert.NotNull(result);
         Assert.Equal(2, result.Users.Count());
     }
@@ -142,10 +143,10 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
         var request = new UpdateUserRequest("John Updated", "john.updated@example.com");
-        var expectedResponse = new UserResponse(userId, "John Updated", "john.updated@example.com", DateTime.UtcNow,
+        var expectedResponse = new GetUserResponse(userId, "John Updated", "john.updated@example.com", DateTime.UtcNow,
             DateTime.UtcNow);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<UpdateUserCommand>(), CancellationToken.None))
+        _mockMediator.Setup(m => m.Send(It.IsAny<UpdateUserCommand>()))
             .Returns(Observable.Return(expectedResponse));
 
         // Act
@@ -153,7 +154,7 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var result = await response.Content.ReadFromJsonAsync<UserResponse>();
+        var result = await response.Content.ReadFromJsonAsync<GetUserResponse>();
         Assert.NotNull(result);
         Assert.Equal("John Updated", result.Name);
         Assert.Equal("john.updated@example.com", result.Email);
@@ -166,7 +167,7 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>(), default))
+        _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>()))
             .Returns(Observable.Return(true));
 
         // Act
@@ -185,7 +186,7 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>(), CancellationToken.None))
+        _mockMediator.Setup(m => m.Send(It.IsAny<DeleteUserCommand>()))
             .Returns(Observable.Return(false));
 
         // Act
@@ -201,17 +202,17 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         // Arrange
         var client = _factory.CreateClient();
         var email = "john@example.com";
-        var expectedResponse = new UserResponse(Guid.NewGuid(), "John Doe", email, DateTime.UtcNow, null);
+        var expectedResponse = new GetUserResponse(Guid.NewGuid(), "John Doe", email, DateTime.UtcNow, null);
 
-        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByEmailQuery>(), CancellationToken.None))
-            .Returns(Observable.Return<UserResponse?>(expectedResponse));
+        _mockMediator.Setup(m => m.Send(It.IsAny<GetUserByEmailQuery>()))
+            .Returns(Observable.Return<GetUserResponse?>(expectedResponse));
 
         // Act
         var response = await client.GetAsync($"/api/users/email/{email}");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var result = await response.Content.ReadFromJsonAsync<UserResponse>();
+        var result = await response.Content.ReadFromJsonAsync<GetUserResponse>();
         Assert.NotNull(result);
         Assert.Equal(email, result.Email);
     }

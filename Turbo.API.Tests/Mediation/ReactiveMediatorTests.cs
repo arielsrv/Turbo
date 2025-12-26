@@ -31,9 +31,10 @@ public class ReactiveMediatorTests
     {
         // Arrange
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
-        var expectedResponse = new UserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
+        var expectedResponse =
+            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
 
-        _mockMediator.Setup(m => m.Send(command, CancellationToken.None))
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -45,7 +46,7 @@ public class ReactiveMediatorTests
         Assert.Equal(expectedResponse.Name, result.Name);
         Assert.Equal(expectedResponse.Email, result.Email);
 
-        _mockMediator.Verify(m => m.Send(command, CancellationToken.None), Times.Once);
+        _mockMediator.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -55,7 +56,7 @@ public class ReactiveMediatorTests
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
         var expectedException = new InvalidOperationException("Handler not found");
 
-        _mockMediator.Setup(m => m.Send(command, CancellationToken.None))
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ThrowsAsync(expectedException);
 
         // Act & Assert
@@ -63,7 +64,7 @@ public class ReactiveMediatorTests
             await Assert.ThrowsAsync<InvalidOperationException>(() => _reactiveMediator.Send(command).ToTask());
 
         Assert.Equal("Handler not found", exception.Message);
-        _mockMediator.Verify(m => m.Send(command, CancellationToken.None), Times.Once);
+        _mockMediator.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -71,18 +72,19 @@ public class ReactiveMediatorTests
     {
         // Arrange
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
-        var expectedResponse = new UserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
-        var cancellationToken = CancellationToken.None;
+        var expectedResponse =
+            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
+        var cancellationToken = new CancellationToken();
 
-        _mockMediator.Setup(m => m.Send(command, cancellationToken))
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _reactiveMediator.Send(command, cancellationToken).ToTask(cancellationToken);
+        var result = await _reactiveMediator.Send(command).ToTask(cancellationToken);
 
         // Assert
         Assert.NotNull(result);
-        _mockMediator.Verify(m => m.Send(command, cancellationToken), Times.Once);
+        _mockMediator.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -91,7 +93,7 @@ public class ReactiveMediatorTests
         // Arrange
         var notification = new object();
 
-        _mockMediator.Setup(m => m.Publish(notification, CancellationToken.None))
+        _mockMediator.Setup(m => m.Publish(notification, It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
@@ -99,7 +101,7 @@ public class ReactiveMediatorTests
 
         // Assert
         Assert.Equal(Unit.Default, result);
-        _mockMediator.Verify(m => m.Publish(notification, CancellationToken.None), Times.Once);
+        _mockMediator.Verify(m => m.Publish(notification, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -109,7 +111,7 @@ public class ReactiveMediatorTests
         var notification = new object();
         var expectedException = new InvalidOperationException("Notification handler error");
 
-        _mockMediator.Setup(m => m.Publish(notification, CancellationToken.None))
+        _mockMediator.Setup(m => m.Publish(notification, It.IsAny<CancellationToken>()))
             .ThrowsAsync(expectedException);
 
         // Act & Assert
@@ -117,7 +119,7 @@ public class ReactiveMediatorTests
             await Assert.ThrowsAsync<InvalidOperationException>(() => _reactiveMediator.Publish(notification).ToTask());
 
         Assert.Equal("Notification handler error", exception.Message);
-        _mockMediator.Verify(m => m.Publish(notification, CancellationToken.None), Times.Once);
+        _mockMediator.Verify(m => m.Publish(notification, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -125,17 +127,17 @@ public class ReactiveMediatorTests
     {
         // Arrange
         var notification = new object();
-        var cancellationToken = CancellationToken.None;
+        var cancellationToken = new CancellationToken();
 
-        _mockMediator.Setup(m => m.Publish(notification, cancellationToken))
+        _mockMediator.Setup(m => m.Publish(notification, It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
         // Act
-        var result = await _reactiveMediator.Publish(notification, cancellationToken).ToTask(cancellationToken);
+        var result = await _reactiveMediator.Publish(notification).ToTask(cancellationToken);
 
         // Assert
         Assert.Equal(Unit.Default, result);
-        _mockMediator.Verify(m => m.Publish(notification, cancellationToken), Times.Once);
+        _mockMediator.Verify(m => m.Publish(notification, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -145,7 +147,7 @@ public class ReactiveMediatorTests
         var command = new DeleteUserCommand(Guid.NewGuid());
         var expectedResponse = true;
 
-        _mockMediator.Setup(m => m.Send(command, CancellationToken.None))
+        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -153,7 +155,7 @@ public class ReactiveMediatorTests
 
         // Assert
         Assert.Equal(expectedResponse, result);
-        _mockMediator.Verify(m => m.Send(command, CancellationToken.None), Times.Once);
+        _mockMediator.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -161,9 +163,9 @@ public class ReactiveMediatorTests
     {
         // Arrange
         var query = new GetUserByIdQuery(Guid.NewGuid());
-        UserResponse? expectedResponse = null;
+        GetUserResponse? expectedResponse = null;
 
-        _mockMediator.Setup(m => m.Send(query, CancellationToken.None))
+        _mockMediator.Setup(m => m.Send(query, It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -171,6 +173,6 @@ public class ReactiveMediatorTests
 
         // Assert
         Assert.Null(result);
-        _mockMediator.Verify(m => m.Send(query, CancellationToken.None), Times.Once);
+        _mockMediator.Verify(m => m.Send(query, It.IsAny<CancellationToken>()), Times.Once);
     }
 }

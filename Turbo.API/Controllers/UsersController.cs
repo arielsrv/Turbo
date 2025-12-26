@@ -13,12 +13,14 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
 {
     // COMMANDS - Write operations
     [HttpPost]
-    public async Task<ActionResult<UserResponse>> CreateUser([FromBody] CreateUserRequest request)
+    public async Task<ActionResult<GetUserResponse>> CreateUser(
+        [FromBody] CreateUserRequest request,
+        CancellationToken cancellationToken)
     {
         try
         {
             var command = new CreateUserCommand(request);
-            var result = await mediator.Send(command).ToTask();
+            var result = await mediator.Send(command).ToTask(cancellationToken);
             return CreatedAtAction(nameof(GetUserById), new { id = result.Id }, result);
         }
         catch (InvalidOperationException ex)
@@ -28,12 +30,15 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    public async Task<ActionResult<UserResponse>> UpdateUser(Guid id, [FromBody] UpdateUserRequest request)
+    public async Task<ActionResult<GetUserResponse>> UpdateUser(
+        Guid id,
+        [FromBody] UpdateUserRequest request,
+        CancellationToken cancellationToken)
     {
         try
         {
             var command = new UpdateUserCommand(id, request);
-            var result = await mediator.Send(command).ToTask();
+            var result = await mediator.Send(command).ToTask(cancellationToken);
             return Ok(result);
         }
         catch (InvalidOperationException ex)
@@ -43,10 +48,10 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    public async Task<ActionResult<bool>> DeleteUser(Guid id)
+    public async Task<ActionResult<bool>> DeleteUser(Guid id, CancellationToken cancellationToken)
     {
         var command = new DeleteUserCommand(id);
-        var result = await mediator.Send(command).ToTask();
+        var result = await mediator.Send(command).ToTask(cancellationToken);
 
         if (!result)
             return NotFound();
@@ -56,18 +61,18 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
 
     // QUERIES - Read operations
     [HttpGet]
-    public async Task<ActionResult<UsersResponse>> GetAllUsers()
+    public async Task<ActionResult<GetUsersResponse>> GetAllUsers(CancellationToken cancellationToken)
     {
         var query = new GetAllUsersQuery();
-        var result = await mediator.Send(query).ToTask();
+        var result = await mediator.Send(query).ToTask(cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<UserResponse>> GetUserById(Guid id)
+    public async Task<ActionResult<GetUserResponse>> GetUserById(Guid id, CancellationToken cancellationToken)
     {
         var query = new GetUserByIdQuery(id);
-        var result = await mediator.Send(query).ToTask();
+        var result = await mediator.Send(query).ToTask(cancellationToken);
 
         if (result == null)
             return NotFound();
@@ -76,10 +81,10 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
     }
 
     [HttpGet("email/{email}")]
-    public async Task<ActionResult<UserResponse>> GetUserByEmail(string email)
+    public async Task<ActionResult<GetUserResponse>> GetUserByEmail(string email, CancellationToken cancellationToken)
     {
         var query = new GetUserByEmailQuery(email);
-        var result = await mediator.Send(query).ToTask();
+        var result = await mediator.Send(query).ToTask(cancellationToken);
 
         if (result == null)
             return NotFound();

@@ -7,7 +7,7 @@ using Turbo.API.Repositories;
 
 namespace Turbo.API.Commands;
 
-public record CreateUserCommand : IRequest<UserResponse>
+public record CreateUserCommand : IRequest<GetUserResponse>
 {
     public CreateUserCommand(CreateUserRequest request)
     {
@@ -20,14 +20,14 @@ public record CreateUserCommand : IRequest<UserResponse>
 }
 
 public class CreateUserCommandHandler(IUserRepository userRepository)
-    : IReactiveRequestHandler<CreateUserCommand, UserResponse>
+    : IReactiveRequestHandler<CreateUserCommand, GetUserResponse>
 {
-    public IObservable<UserResponse> Handle(CreateUserCommand request)
+    public IObservable<GetUserResponse> Handle(CreateUserCommand request)
     {
         var user = new User(request.Name, request.Email);
 
         return userRepository.AddAsync(user)
-            .Select(createdUser => new UserResponse(
+            .Select(createdUser => new GetUserResponse(
                 createdUser.Id,
                 createdUser.Name,
                 createdUser.Email,

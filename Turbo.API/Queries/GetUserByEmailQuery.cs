@@ -6,7 +6,7 @@ using Turbo.API.Repositories;
 
 namespace Turbo.API.Queries;
 
-public record GetUserByEmailQuery : IRequest<UserResponse?>
+public record GetUserByEmailQuery : IRequest<GetUserResponse?>
 {
     public GetUserByEmailQuery(string email)
     {
@@ -17,14 +17,14 @@ public record GetUserByEmailQuery : IRequest<UserResponse?>
 }
 
 public class GetUserByEmailQueryHandler(IUserRepository userRepository)
-    : IReactiveRequestHandler<GetUserByEmailQuery, UserResponse?>
+    : IReactiveRequestHandler<GetUserByEmailQuery, GetUserResponse?>
 {
-    public IObservable<UserResponse?> Handle(GetUserByEmailQuery request)
+    public IObservable<GetUserResponse?> Handle(GetUserByEmailQuery request)
     {
         return userRepository.GetByEmailAsync(request.Email)
             .Select(user => user == null
                 ? null
-                : new UserResponse(
+                : new GetUserResponse(
                     user.Id,
                     user.Name,
                     user.Email,
