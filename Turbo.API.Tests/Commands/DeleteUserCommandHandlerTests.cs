@@ -2,6 +2,8 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using Moq;
 using Turbo.API.Commands;
+using Turbo.API.Handlers;
+using Turbo.API.Handlers.Commands;
 using Turbo.API.Repositories;
 
 namespace Turbo.API.Tests.Commands;

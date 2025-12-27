@@ -3,6 +3,8 @@ using System.Reactive.Threading.Tasks;
 using Moq;
 using Turbo.API.Commands;
 using Turbo.API.DTOs;
+using Turbo.API.Handlers;
+using Turbo.API.Handlers.Commands;
 using Turbo.API.Models;
 using Turbo.API.Repositories;
 

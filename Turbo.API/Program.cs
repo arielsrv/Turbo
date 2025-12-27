@@ -1,5 +1,8 @@
 using Turbo.API.Commands;
 using Turbo.API.DTOs;
+using Turbo.API.Handlers;
+using Turbo.API.Handlers.Commands;
+using Turbo.API.Handlers.Queries;
 using Turbo.API.Mediation;
 using Turbo.API.Middleware;
 using Turbo.API.Queries;

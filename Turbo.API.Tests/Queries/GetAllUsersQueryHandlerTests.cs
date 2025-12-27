@@ -1,6 +1,8 @@
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using Moq;
+using Turbo.API.Handlers;
+using Turbo.API.Handlers.Queries;
 using Turbo.API.Models;
 using Turbo.API.Queries;
 using Turbo.API.Repositories;
