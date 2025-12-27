@@ -1,12 +1,11 @@
 using System.Reactive.Linq;
-using MediatR;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
 using Turbo.API.Repositories;
 
 namespace Turbo.API.Queries;
 
-public record GetUserByEmailQuery : IRequest<GetUserResponse?>
+public record GetUserByEmailQuery
 {
     public GetUserByEmailQuery(string email)
     {

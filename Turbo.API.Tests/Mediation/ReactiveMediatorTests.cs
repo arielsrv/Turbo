@@ -1,5 +1,6 @@
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Turbo.API.Commands;
@@ -11,33 +12,23 @@ namespace Turbo.API.Tests.Mediation;
 
 public class ReactiveMediatorTests
 {
-    private readonly Mock<IMediator> _mockMediator;
-    private readonly ReactiveMediator _reactiveMediator;
-
-    public ReactiveMediatorTests()
-    {
-        _mockMediator = new Mock<IMediator>();
-        _reactiveMediator = new ReactiveMediator(_mockMediator.Object);
-
-        // Setup service provider for testing
-        var services = new ServiceCollection();
-        services.AddSingleton(_mockMediator.Object);
-        services.BuildServiceProvider();
-    }
-
     [Fact]
     public async Task Send_ValidRequest_ReturnsResponse()
     {
         // Arrange
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
         var expectedResponse =
-            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
+            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow);
 
-        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+        var mockHandler = new Mock<IReactiveRequestHandler<CreateUserCommand, GetUserResponse>>();
+        mockHandler.Setup(h => h.Handle(It.IsAny<CreateUserCommand>()))
+            .Returns(Observable.Return(expectedResponse));
+
+        var serviceProvider = CreateServiceProvider(mockHandler.Object);
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
 
         // Act
-        var result = await _reactiveMediator.Send(command).ToTask();
+        var result = await reactiveMediator.Send<CreateUserCommand, GetUserResponse>(command).ToTask();
 
         // Assert
         Assert.NotNull(result);
@@ -45,98 +36,68 @@ public class ReactiveMediatorTests
         Assert.Equal(expectedResponse.Name, result.Name);
         Assert.Equal(expectedResponse.Email, result.Email);
 
-        _mockMediator.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
+        mockHandler.Verify(h => h.Handle(It.IsAny<CreateUserCommand>()), Times.Once);
     }
 
     [Fact]
-    public async Task Send_MediatorThrowsException_PropagatesException()
+    public async Task Send_HandlerThrowsException_PropagatesException()
     {
         // Arrange
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
-        var expectedException = new InvalidOperationException("Handler not found");
+        var expectedException = new InvalidOperationException("Handler error");
 
-        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
-            .ThrowsAsync(expectedException);
+        var mockHandler = new Mock<IReactiveRequestHandler<CreateUserCommand, GetUserResponse>>();
+        mockHandler.Setup(h => h.Handle(It.IsAny<CreateUserCommand>()))
+            .Returns(Observable.Throw<GetUserResponse>(expectedException));
+
+        var serviceProvider = CreateServiceProvider(mockHandler.Object);
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
 
         // Act & Assert
-        var exception =
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _reactiveMediator.Send(command).ToTask());
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            reactiveMediator.Send<CreateUserCommand, GetUserResponse>(command).ToTask());
 
-        Assert.Equal("Handler not found", exception.Message);
-        _mockMediator.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Equal("Handler error", exception.Message);
+        mockHandler.Verify(h => h.Handle(It.IsAny<CreateUserCommand>()), Times.Once);
     }
 
     [Fact]
-    public async Task Send_WithCancellationToken_PassesTokenToMediator()
+    public void Send_NoHandlerRegistered_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
+        var serviceProvider = new ServiceCollection().BuildServiceProvider();
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
+
+        // Act & Assert
+        var exception =
+            Assert.Throws<InvalidOperationException>(() =>
+                reactiveMediator.Send<CreateUserCommand, GetUserResponse>(command));
+
+        Assert.Contains("No handler registered for CreateUserCommand", exception.Message);
+    }
+
+    [Fact]
+    public async Task SendAsync_ValidRequest_ReturnsResponse()
     {
         // Arrange
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
         var expectedResponse =
-            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
-        var cancellationToken = CancellationToken.None;
+            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow);
 
-        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+        var mockHandler = new Mock<IReactiveRequestHandler<CreateUserCommand, GetUserResponse>>();
+        mockHandler.Setup(h => h.Handle(It.IsAny<CreateUserCommand>()))
+            .Returns(Observable.Return(expectedResponse));
+
+        var serviceProvider = CreateServiceProvider(mockHandler.Object);
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
 
         // Act
-        var result = await _reactiveMediator.Send(command).ToTask(cancellationToken);
+        var result = await reactiveMediator.SendAsync<CreateUserCommand, GetUserResponse>(command);
 
         // Assert
         Assert.NotNull(result);
-        _mockMediator.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task Publish_ValidNotification_ReturnsUnit()
-    {
-        // Arrange
-        var notification = new object();
-
-        _mockMediator.Setup(m => m.Publish(notification, It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        // Act
-        var result = await _reactiveMediator.Publish(notification).ToTask();
-
-        // Assert
-        Assert.Equal(System.Reactive.Unit.Default, result);
-        _mockMediator.Verify(m => m.Publish(notification, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task Publish_MediatorThrowsException_PropagatesException()
-    {
-        // Arrange
-        var notification = new object();
-        var expectedException = new InvalidOperationException("Notification handler error");
-
-        _mockMediator.Setup(m => m.Publish(notification, It.IsAny<CancellationToken>()))
-            .ThrowsAsync(expectedException);
-
-        // Act & Assert
-        var exception =
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _reactiveMediator.Publish(notification).ToTask());
-
-        Assert.Equal("Notification handler error", exception.Message);
-        _mockMediator.Verify(m => m.Publish(notification, It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task Publish_WithCancellationToken_PassesTokenToMediator()
-    {
-        // Arrange
-        var notification = new object();
-        var cancellationToken = CancellationToken.None;
-
-        _mockMediator.Setup(m => m.Publish(notification, It.IsAny<CancellationToken>()))
-            .Returns(Task.CompletedTask);
-
-        // Act
-        var result = await _reactiveMediator.Publish(notification).ToTask(cancellationToken);
-
-        // Assert
-        Assert.Equal(System.Reactive.Unit.Default, result);
-        _mockMediator.Verify(m => m.Publish(notification, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.Equal(expectedResponse.Id, result.Id);
     }
 
     [Fact]
@@ -144,35 +105,108 @@ public class ReactiveMediatorTests
     {
         // Arrange
         var command = new DeleteUserCommand(Guid.NewGuid());
-        var expectedResponse = true;
 
-        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+        var mockHandler = new Mock<IReactiveRequestHandler<DeleteUserCommand, bool>>();
+        mockHandler.Setup(h => h.Handle(It.IsAny<DeleteUserCommand>()))
+            .Returns(Observable.Return(true));
+
+        var serviceProvider = CreateServiceProvider(mockHandler.Object);
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
 
         // Act
-        var result = await _reactiveMediator.Send(command).ToTask();
+        var result = await reactiveMediator.Send<DeleteUserCommand, bool>(command).ToTask();
 
         // Assert
-        Assert.Equal(expectedResponse, result);
-        _mockMediator.Verify(m => m.Send(command, It.IsAny<CancellationToken>()), Times.Once);
+        Assert.True(result);
+        mockHandler.Verify(h => h.Handle(It.IsAny<DeleteUserCommand>()), Times.Once);
     }
 
     [Fact]
-    public async Task Send_NullableResponse_ReturnsCorrectType()
+    public async Task Send_NullableResponse_ReturnsNull()
     {
         // Arrange
         var query = new GetUserByIdQuery(Guid.NewGuid());
-        GetUserResponse? expectedResponse = null;
 
-        _mockMediator.Setup(m => m.Send(query, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(expectedResponse);
+        var mockHandler = new Mock<IReactiveRequestHandler<GetUserByIdQuery, GetUserResponse?>>();
+        mockHandler.Setup(h => h.Handle(It.IsAny<GetUserByIdQuery>()))
+            .Returns(Observable.Return<GetUserResponse?>(null));
+
+        var serviceProvider = CreateServiceProvider(mockHandler.Object);
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
 
         // Act
-        var result = await _reactiveMediator.Send(query).ToTask();
+        var result = await reactiveMediator.Send<GetUserByIdQuery, GetUserResponse?>(query).ToTask();
 
         // Assert
         Assert.Null(result);
-        _mockMediator.Verify(m => m.Send(query, It.IsAny<CancellationToken>()), Times.Once);
+        mockHandler.Verify(h => h.Handle(It.IsAny<GetUserByIdQuery>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Publish_WithHandlers_CallsAllHandlers()
+    {
+        // Arrange
+        var notification = new TestNotification("Test message");
+
+        var mockHandler1 = new Mock<IReactiveNotificationHandler<TestNotification>>();
+        mockHandler1.Setup(h => h.Handle(It.IsAny<TestNotification>()))
+            .Returns(Observable.Return(Unit.Default));
+
+        var mockHandler2 = new Mock<IReactiveNotificationHandler<TestNotification>>();
+        mockHandler2.Setup(h => h.Handle(It.IsAny<TestNotification>()))
+            .Returns(Observable.Return(Unit.Default));
+
+        var services = new ServiceCollection();
+        services.AddSingleton(mockHandler1.Object);
+        services.AddSingleton(mockHandler2.Object);
+        var serviceProvider = services.BuildServiceProvider();
+
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
+
+        // Act
+        await reactiveMediator.Publish(notification).ToTask();
+
+        // Assert
+        mockHandler1.Verify(h => h.Handle(It.IsAny<TestNotification>()), Times.Once);
+        mockHandler2.Verify(h => h.Handle(It.IsAny<TestNotification>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task Publish_NoHandlers_ReturnsUnitDefault()
+    {
+        // Arrange
+        var notification = new TestNotification("Test message");
+        var serviceProvider = new ServiceCollection().BuildServiceProvider();
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
+
+        // Act
+        var result = await reactiveMediator.Publish(notification).ToTask();
+
+        // Assert
+        Assert.Equal(Unit.Default, result);
+    }
+
+    [Fact]
+    public async Task PublishAsync_WithHandlers_CompletesSuccessfully()
+    {
+        // Arrange
+        var notification = new TestNotification("Test message");
+
+        var mockHandler = new Mock<IReactiveNotificationHandler<TestNotification>>();
+        mockHandler.Setup(h => h.Handle(It.IsAny<TestNotification>()))
+            .Returns(Observable.Return(Unit.Default));
+
+        var services = new ServiceCollection();
+        services.AddSingleton(mockHandler.Object);
+        var serviceProvider = services.BuildServiceProvider();
+
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
+
+        // Act
+        await reactiveMediator.PublishAsync(notification);
+
+        // Assert
+        mockHandler.Verify(h => h.Handle(It.IsAny<TestNotification>()), Times.Once);
     }
 
     [Fact]
@@ -182,72 +216,28 @@ public class ReactiveMediatorTests
         var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
         var cts = new CancellationTokenSource();
 
-        _mockMediator.Setup(m => m.Send(command, It.IsAny<CancellationToken>()))
-            .Returns(async (CreateUserCommand _, CancellationToken ct) =>
-            {
-                await Task.Delay(Timeout.Infinite, ct);
-                return new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
-            });
+        var mockHandler = new Mock<IReactiveRequestHandler<CreateUserCommand, GetUserResponse>>();
+        mockHandler.Setup(h => h.Handle(It.IsAny<CreateUserCommand>()))
+            .Returns(Observable.Never<GetUserResponse>());
+
+        var serviceProvider = CreateServiceProvider(mockHandler.Object);
+        var reactiveMediator = new ReactiveMediator(serviceProvider);
 
         // Act
-        var task = _reactiveMediator.Send(command).ToTask(cts.Token);
+        var task = reactiveMediator.SendAsync<CreateUserCommand, GetUserResponse>(command, cts.Token);
         await cts.CancelAsync();
 
         // Assert
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
     }
 
-    [Fact]
-    public async Task Send_WhenAlreadyCancelled_ThrowsImmediately()
+    private static IServiceProvider CreateServiceProvider<THandler>(THandler handler) where THandler : class
     {
-        // Arrange
-        var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
-        var cts = new CancellationTokenSource();
-        await cts.CancelAsync();
-
-        // Act & Assert
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
-            _reactiveMediator.Send(command).ToTask(cts.Token));
-    }
-
-    [Fact]
-    public async Task Publish_WhenCancelled_ThrowsOperationCancelledException()
-    {
-        // Arrange
-        var notification = new object();
-        var cts = new CancellationTokenSource();
-
-        _mockMediator.Setup(m => m.Publish(notification, It.IsAny<CancellationToken>()))
-            .Returns(async (object _, CancellationToken ct) => { await Task.Delay(Timeout.Infinite, ct); });
-
-        // Act
-        var task = _reactiveMediator.Publish(notification).ToTask(cts.Token);
-        await cts.CancelAsync();
-
-        // Assert
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
-    }
-
-    [Fact]
-    public async Task Send_CancellationTokenIsPassedToMediator()
-    {
-        // Arrange
-        var command = new CreateUserCommand(new CreateUserRequest("John Doe", "john@example.com"));
-        var expectedResponse = new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow);
-        var capturedToken = CancellationToken.None;
-
-        _mockMediator
-            .Setup(mediator => mediator.Send(command, It.IsAny<CancellationToken>()))
-            .Callback<IRequest<GetUserResponse>, CancellationToken>((_, cancellationToken) =>
-                capturedToken = cancellationToken)
-            .ReturnsAsync(expectedResponse);
-
-        var cancellationTokenSource = new CancellationTokenSource();
-
-        // Act
-        await _reactiveMediator.Send(command).ToTask(cancellationTokenSource.Token);
-
-        // Assert
-        Assert.True(capturedToken.CanBeCanceled, "CancellationToken should be cancellable");
+        var services = new ServiceCollection();
+        services.AddSingleton(handler);
+        return services.BuildServiceProvider();
     }
 }
+
+// Test notification class - must be public for Moq to create proxies
+public record TestNotification(string Message);

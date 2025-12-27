@@ -1,6 +1,7 @@
 using Turbo.API.Commands;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
+using Turbo.API.Middleware;
 using Turbo.API.Queries;
 using Turbo.API.Repositories;
 
@@ -16,8 +17,9 @@ public class Program
         builder.Services.AddControllers();
         builder.Services.AddAuthorization();
 
-        // Register MediatR
-        builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+        // Configure RFC 7807 Problem Details
+        builder.Services.AddProblemDetails();
+
         // Register ReactiveMediator
         builder.Services.AddSingleton<IReactiveMediator, ReactiveMediator>();
 
@@ -45,7 +47,7 @@ public class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment()) app.MapOpenApi();
 
-        app.UseHttpsRedirection();
+        app.UseExceptionHandling(); // RFC 7807 Problem Details error handling
         app.UseAuthorization();
         app.MapControllers();
 

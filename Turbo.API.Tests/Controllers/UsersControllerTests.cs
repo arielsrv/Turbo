@@ -35,9 +35,11 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var request = new CreateUserRequest("John Doe", "john@example.com");
         var expectedResponse =
-            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null);
+            new GetUserResponse(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow);
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<CreateUserCommand, GetUserResponse>(It.IsAny<CreateUserCommand>(),
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -60,7 +62,9 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var request = new CreateUserRequest("John Doe", "john@example.com");
         var exception = new InvalidOperationException("User with email john@example.com already exists");
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<CreateUserCommand>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<CreateUserCommand, GetUserResponse>(It.IsAny<CreateUserCommand>(),
+                    It.IsAny<CancellationToken>()))
             .ThrowsAsync(exception);
 
         // Act
@@ -68,6 +72,7 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
 
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
         var errorContent = await response.Content.ReadAsStringAsync();
         Assert.Contains("User with email john@example.com already exists", errorContent);
     }
@@ -78,9 +83,11 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         // Arrange
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
-        var expectedResponse = new GetUserResponse(userId, "John Doe", "john@example.com", DateTime.UtcNow, null);
+        var expectedResponse = new GetUserResponse(userId, "John Doe", "john@example.com", DateTime.UtcNow);
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<GetUserByIdQuery, GetUserResponse?>(It.IsAny<GetUserByIdQuery>(),
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -100,7 +107,9 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<GetUserByIdQuery, GetUserResponse?>(It.IsAny<GetUserByIdQuery>(),
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync((GetUserResponse?)null);
 
         // Act
@@ -108,6 +117,7 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
     }
 
     [Fact]
@@ -117,12 +127,14 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var users = new List<GetUserResponse>
         {
-            new(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow, null),
-            new(Guid.NewGuid(), "Jane Smith", "jane@example.com", DateTime.UtcNow, null)
+            new(Guid.NewGuid(), "John Doe", "john@example.com", DateTime.UtcNow),
+            new(Guid.NewGuid(), "Jane Smith", "jane@example.com", DateTime.UtcNow)
         };
         var expectedResponse = new GetUsersResponse(users);
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<GetAllUsersQuery, GetUsersResponse>(It.IsAny<GetAllUsersQuery>(),
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -145,7 +157,9 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var expectedResponse = new GetUserResponse(userId, "John Updated", "john.updated@example.com", DateTime.UtcNow,
             DateTime.UtcNow);
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<UpdateUserCommand>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<UpdateUserCommand, GetUserResponse>(It.IsAny<UpdateUserCommand>(),
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -160,22 +174,21 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
     }
 
     [Fact]
-    public async Task DeleteUser_ExistingUser_ReturnsOk()
+    public async Task DeleteUser_ExistingUser_ReturnsNoContent()
     {
         // Arrange
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<DeleteUserCommand>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<DeleteUserCommand, bool>(It.IsAny<DeleteUserCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(true);
 
         // Act
         var response = await client.DeleteAsync($"/api/users/{userId}");
 
         // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var result = await response.Content.ReadFromJsonAsync<bool>();
-        Assert.True(result);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     [Fact]
@@ -185,7 +198,8 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var userId = Guid.NewGuid();
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<DeleteUserCommand>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<DeleteUserCommand, bool>(It.IsAny<DeleteUserCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(false);
 
         // Act
@@ -193,6 +207,7 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
 
         // Assert
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        Assert.Equal("application/problem+json", response.Content.Headers.ContentType?.MediaType);
     }
 
     [Fact]
@@ -201,9 +216,11 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         // Arrange
         var client = _factory.CreateClient();
         var email = "john@example.com";
-        var expectedResponse = new GetUserResponse(Guid.NewGuid(), "John Doe", email, DateTime.UtcNow, null);
+        var expectedResponse = new GetUserResponse(Guid.NewGuid(), "John Doe", email, DateTime.UtcNow);
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetUserByEmailQuery>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<GetUserByEmailQuery, GetUserResponse?>(It.IsAny<GetUserByEmailQuery>(),
+                    It.IsAny<CancellationToken>()))
             .ReturnsAsync(expectedResponse);
 
         // Act
@@ -223,7 +240,9 @@ public class UsersControllerTests : IClassFixture<WebApplicationFactory<Program>
         var client = _factory.CreateClient();
         var cts = new CancellationTokenSource();
 
-        _mockMediator.Setup(m => m.SendAsync(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
+        _mockMediator.Setup(m =>
+                m.SendAsync<GetAllUsersQuery, GetUsersResponse>(It.IsAny<GetAllUsersQuery>(),
+                    It.IsAny<CancellationToken>()))
             .Returns<GetAllUsersQuery, CancellationToken>((_, ct) =>
                 Task.Delay(Timeout.Infinite, ct)
                     .ContinueWith<GetUsersResponse>(_ => throw new TaskCanceledException(), ct));

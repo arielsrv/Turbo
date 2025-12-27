@@ -1,12 +1,11 @@
 using System.Reactive.Linq;
-using MediatR;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
 using Turbo.API.Repositories;
 
 namespace Turbo.API.Queries;
 
-public record GetAllUsersQuery : IRequest<GetUsersResponse>;
+public record GetAllUsersQuery;
 
 public class GetAllUsersQueryHandler(IUserRepository userRepository)
     : IReactiveRequestHandler<GetAllUsersQuery, GetUsersResponse>

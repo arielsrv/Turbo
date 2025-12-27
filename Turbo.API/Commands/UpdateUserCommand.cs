@@ -1,12 +1,11 @@
 using System.Reactive.Linq;
-using MediatR;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
 using Turbo.API.Repositories;
 
 namespace Turbo.API.Commands;
 
-public record UpdateUserCommand : IRequest<GetUserResponse>
+public record UpdateUserCommand
 {
     public UpdateUserCommand(Guid id, UpdateUserRequest request)
     {

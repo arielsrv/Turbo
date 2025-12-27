@@ -50,10 +50,7 @@ public class InMemoryUserRepository : IUserRepository
                 {
                     var user = _users.FirstOrDefault(u => u.Id == id);
 #if DEBUG
-                    if (user != null)
-                    {
-                        _ = user.Name;
-                    }
+                    if (user != null) _ = user.Name;
 #endif
                     observer.OnNext(user);
                     observer.OnCompleted();
@@ -140,10 +137,7 @@ public class InMemoryUserRepository : IUserRepository
                 {
                     var user = _users.FirstOrDefault(u => u.Id == id);
 #if DEBUG
-                    if (user != null)
-                    {
-                        _ = user.Name;
-                    }
+                    if (user != null) _ = user.Name;
 #endif
                     if (user == null)
                     {
@@ -180,10 +174,7 @@ public class InMemoryUserRepository : IUserRepository
                 {
                     var user = _users.FirstOrDefault(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
 #if DEBUG
-                    if (user != null)
-                    {
-                        _ = user.Name;
-                    }
+                    if (user != null) _ = user.Name;
 #endif
                     observer.OnNext(user);
                     observer.OnCompleted();

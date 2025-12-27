@@ -1,10 +1,9 @@
-using MediatR;
 using Turbo.API.Mediation;
 using Turbo.API.Repositories;
 
 namespace Turbo.API.Commands;
 
-public record DeleteUserCommand(Guid Id) : IRequest<bool>;
+public record DeleteUserCommand(Guid Id);
 
 public class DeleteUserCommandHandler(IUserRepository userRepository) : IReactiveRequestHandler<DeleteUserCommand, bool>
 {

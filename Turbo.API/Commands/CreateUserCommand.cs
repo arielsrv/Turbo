@@ -1,5 +1,4 @@
 using System.Reactive.Linq;
-using MediatR;
 using Turbo.API.DTOs;
 using Turbo.API.Mediation;
 using Turbo.API.Models;
@@ -7,7 +6,7 @@ using Turbo.API.Repositories;
 
 namespace Turbo.API.Commands;
 
-public record CreateUserCommand : IRequest<GetUserResponse>
+public record CreateUserCommand
 {
     public CreateUserCommand(CreateUserRequest request)
     {
