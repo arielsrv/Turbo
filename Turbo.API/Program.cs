@@ -1,3 +1,4 @@
+using Scalar.AspNetCore;
 using Turbo.API.Commands;
 using Turbo.API.DTOs;
 using Turbo.API.Handlers;
@@ -48,7 +49,11 @@ public class Program
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment()) app.MapOpenApi();
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+            app.MapScalarApiReference(); // UI interactiva en /scalar/v1
+        }
 
         app.UseExceptionHandling(); // RFC 7807 Problem Details error handling
         app.UseAuthorization();
