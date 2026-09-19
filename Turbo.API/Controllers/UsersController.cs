@@ -7,6 +7,7 @@ using Turbo.API.Queries;
 
 namespace Turbo.API.Controllers;
 
+[ApiController]
 [Route("api/[controller]")]
 public class UsersController(IReactiveMediator mediator) : ControllerBase
 {
@@ -73,9 +74,6 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
             await mediator.SendAsync<GetUserByEmailQuery, GetUserResponse?>(new GetUserByEmailQuery(email),
                 cancellationToken);
 
-        if (result is null)
-            throw new NotFoundException("User", email);
-
-        return Ok(result);
+        return result is null ? throw new NotFoundException("User", email) : Ok(result);
     }
 }
