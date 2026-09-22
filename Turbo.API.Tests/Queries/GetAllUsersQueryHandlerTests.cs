@@ -32,7 +32,7 @@ public class GetAllUsersQueryHandlerTests
         };
 
         _mockRepository.Setup(r => r.GetAllAsync())
-            .Returns(Observable.Return<IEnumerable<User>>(users));
+            .Returns(users.ToObservable());
 
         // Act
         var result = await _handler.Handle(query).ToTask();
@@ -61,7 +61,7 @@ public class GetAllUsersQueryHandlerTests
         var query = new GetAllUsersQuery();
 
         _mockRepository.Setup(r => r.GetAllAsync())
-            .Returns(Observable.Return<IEnumerable<User>>(new List<User>()));
+            .Returns(Observable.Empty<User>());
 
         // Act
         var result = await _handler.Handle(query).ToTask();
@@ -82,7 +82,7 @@ public class GetAllUsersQueryHandlerTests
         var expectedException = new InvalidOperationException("Database error");
 
         _mockRepository.Setup(r => r.GetAllAsync())
-            .Returns(Observable.Throw<IEnumerable<User>>(expectedException));
+            .Returns(Observable.Throw<User>(expectedException));
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _handler.Handle(query).ToTask());
@@ -99,7 +99,7 @@ public class GetAllUsersQueryHandlerTests
         var users = new List<User> { user };
 
         _mockRepository.Setup(r => r.GetAllAsync())
-            .Returns(Observable.Return<IEnumerable<User>>(users));
+            .Returns(users.ToObservable());
 
         // Act
         var result = await _handler.Handle(query).ToTask();

@@ -1,3 +1,4 @@
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
 using Turbo.API.Models;
@@ -87,7 +88,7 @@ public class InMemoryUserRepositoryTests
     public async Task GetAllAsync_EmptyRepository_ReturnsEmptyList()
     {
         // Act
-        var result = await _repository.GetAllAsync().ToTask();
+        var result = await _repository.GetAllAsync().ToList().ToTask();
 
         // Assert
         Assert.NotNull(result);
@@ -104,7 +105,7 @@ public class InMemoryUserRepositoryTests
         await _repository.AddAsync(user2).ToTask();
 
         // Act
-        var result = await _repository.GetAllAsync().ToTask();
+        var result = await _repository.GetAllAsync().ToList().ToTask();
 
         // Assert
         Assert.NotNull(result);
@@ -258,8 +259,8 @@ public class InMemoryUserRepositoryTests
         await Task.WhenAll(tasks);
 
         // Assert
-        var allUsers = await _repository.GetAllAsync().ToTask();
-        Assert.Equal(userCount, allUsers.Count());
+        var allUsers = await _repository.GetAllAsync().ToList().ToTask();
+        Assert.Equal(userCount, allUsers.Count);
     }
 
     [Fact]

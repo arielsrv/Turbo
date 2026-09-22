@@ -4,6 +4,7 @@ using Turbo.API.DTOs;
 using Turbo.API.Exceptions;
 using Turbo.API.Mediation;
 using Turbo.API.Queries;
+using Turbo.API.Streaming;
 
 namespace Turbo.API.Controllers;
 
@@ -53,6 +54,22 @@ public class UsersController(IReactiveMediator mediator) : ControllerBase
         var result =
             await mediator.SendAsync<GetAllUsersQuery, GetUsersResponse>(new GetAllUsersQuery(), cancellationToken);
         return Ok(result);
+    }
+
+    /// <summary>
+    ///     Streams users as they are produced instead of buffering the whole collection.
+    /// </summary>
+    /// <remarks>
+    ///     Because the response begins before the collection is known, a failure partway through cannot
+    ///     become a ProblemDetails payload — the 200 and its headers are already on the wire. Clients
+    ///     that need an error status for a partial failure should use <c>GET /api/Users</c> instead.
+    /// </remarks>
+    [HttpGet("stream")]
+    public IAsyncEnumerable<GetUserResponse> StreamUsers(CancellationToken cancellationToken)
+    {
+        return mediator
+            .Send<StreamUsersQuery, GetUserResponse>(new StreamUsersQuery())
+            .ToAsyncEnumerable(cancellationToken: cancellationToken);
     }
 
     [HttpGet("{id:guid}")]

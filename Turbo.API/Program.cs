@@ -1,12 +1,6 @@
 using Scalar.AspNetCore;
-using Turbo.API.Commands;
-using Turbo.API.DTOs;
-using Turbo.API.Handlers;
-using Turbo.API.Handlers.Commands;
-using Turbo.API.Handlers.Queries;
 using Turbo.API.Mediation;
 using Turbo.API.Middleware;
-using Turbo.API.Queries;
 using Turbo.API.Repositories;
 
 namespace Turbo.API;
@@ -24,24 +18,12 @@ public class Program
         // Configure RFC 7807 Problem Details
         builder.Services.AddProblemDetails();
 
-        // Register ReactiveMediator
-        builder.Services.AddSingleton<IReactiveMediator, ReactiveMediator>();
-
         // Register repositories
         builder.Services.AddSingleton<IUserRepository, InMemoryUserRepository>();
 
-        // Register handlers
-        builder.Services
-            .AddTransient<IReactiveRequestHandler<CreateUserCommand, GetUserResponse>, CreateUserCommandHandler>();
-        builder.Services
-            .AddTransient<IReactiveRequestHandler<UpdateUserCommand, GetUserResponse>, UpdateUserCommandHandler>();
-        builder.Services.AddTransient<IReactiveRequestHandler<DeleteUserCommand, bool>, DeleteUserCommandHandler>();
-        builder.Services
-            .AddTransient<IReactiveRequestHandler<GetUserByIdQuery, GetUserResponse?>, GetUserByIdQueryHandler>();
-        builder.Services
-            .AddTransient<IReactiveRequestHandler<GetAllUsersQuery, GetUsersResponse>, GetAllUsersQueryHandler>();
-        builder.Services
-            .AddTransient<IReactiveRequestHandler<GetUserByEmailQuery, GetUserResponse?>, GetUserByEmailQueryHandler>();
+        // Mediator plus every handler in this assembly, discovered by scanning
+        builder.Services.AddReactiveMediation(typeof(Program).Assembly);
+        builder.Services.AddPipelineBehavior(typeof(LoggingPipelineBehavior<,>));
 
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
