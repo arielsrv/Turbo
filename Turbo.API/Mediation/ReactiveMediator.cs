@@ -40,7 +40,14 @@ public class ReactiveMediator(IServiceProvider serviceProvider) : IReactiveMedia
                 $"No handler registered for {typeof(TRequest).Name}. " +
                 $"Ensure IReactiveRequestHandler<{typeof(TRequest).Name}, {typeof(TResponse).Name}> is registered.");
 
-        return handler.Handle(request);
+        // Fold the behaviours around the handler, innermost first, so the first one registered
+        // ends up outermost and therefore sees the whole pipeline underneath it.
+        return serviceProvider
+            .GetServices<IReactivePipelineBehavior<TRequest, TResponse>>()
+            .Reverse()
+            .Aggregate(
+                () => handler.Handle(request),
+                (next, behavior) => () => behavior.Handle(request, next))();
     }
 
     public Task<TResponse> SendAsync<TRequest, TResponse>(TRequest request,

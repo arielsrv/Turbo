@@ -65,18 +65,22 @@ public class InMemoryUserRepository : IUserRepository
         });
     }
 
-    public IObservable<IEnumerable<User>> GetAllAsync()
+    public IObservable<User> GetAllAsync()
     {
-        return Observable.Create<IEnumerable<User>>(observer =>
+        return Observable.Create<User>(observer =>
         {
             try
             {
+                // Snapshot under the lock, then emit outside it: subscribers run arbitrary code on
+                // OnNext, and holding the lock across N of those invites deadlock.
+                User[] snapshot;
                 lock (_lock)
                 {
-                    var users = _users.ToList();
-                    observer.OnNext(users);
-                    observer.OnCompleted();
+                    snapshot = [.. _users];
                 }
+
+                foreach (var user in snapshot) observer.OnNext(user);
+                observer.OnCompleted();
             }
             catch (Exception ex)
             {
